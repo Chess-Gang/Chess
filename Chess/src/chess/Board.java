@@ -117,17 +117,12 @@ public class Board {
         board[piecToRemove.xPos][piecToRemove.yPos] = null;
         allPieces.remove(piecToRemove);
     }
-    //Remove a piece based off an instance
+    //Remove a piece based off an instance also decided if game has been won
     public static void RemovePiece(Piece pec){
-        System.out.println(pec.getClass().toString());
-        if(pec.getClass().toString() == "class Chess.King" && pec.myPlayer.getColor().equals(Color.black)){
-            System.out.println("chess.Board.RemovePiece()");
+        if(pec instanceof King && pec.myPlayer.getColor().equals(Color.black))//Gives win to player1
             winner = WinState.WIN_P1;
-        }
-        else if(pec.getClass().toString() == "class Chess.King" && pec.myPlayer.getColor().equals(Color.white)){
-            System.out.println("chess.Board.RemovePiece()");
+        else if(pec instanceof King && pec.myPlayer.getColor().equals(Color.white))//gives win to player2
             winner = WinState.WIN_P2;
-        }
         board[pec.xPos][pec.yPos] = null;
         allPieces.remove(pec);
     }
@@ -198,15 +193,19 @@ public class Board {
 
     //Display if a player has won.
         if (winner == WinState.WIN_P1) {
-            g.setColor(Color.red);
-            g.setFont(new Font("Arial",Font.PLAIN,20));
-            g.drawString("Player 1 Has Won",40,65);                
+            g.setColor(Color.black);
+            g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial",Font.PLAIN,50));
+            g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
         } else if (winner == WinState.WIN_P2) {
+            g.setColor(Color.white);
+            g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
             g.setColor(Color.black);
-            g.setFont(new Font("Arial",Font.PLAIN,20));
-            g.drawString("Player 2 Has Won",40,65);                
+            g.setFont(new Font("Arial",Font.PLAIN,50));
+            g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
         } else if (winner == WinState.TIE) {
-            g.setColor(Color.black);
+            g.setColor(Color.white);
             g.setFont(new Font("Arial",Font.PLAIN,20));
             g.drawString("It is a tie",40,65);                
         }
