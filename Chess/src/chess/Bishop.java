@@ -19,12 +19,9 @@ import java.awt.Toolkit;
  * @author Conner
  */
 public class Bishop extends Piece{
-    public enum Side{LEFT, RIGHT};
-    Side startSpot;
     
-    Bishop(int x, int y, Player play, Side type){
+    Bishop(int x, int y, Player play){
         super(x,y,play);
-        startSpot = type;
         if(myPlayer.getColor().equals(Color.white))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_bishop_1x.png");
         else

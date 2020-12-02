@@ -32,10 +32,14 @@ public class Pawn extends Piece{
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
+        
         //black direction
         if(myPlayer.getColor().equals(Color.black)){
             if(Board.CheckifOpenSpot(xPos, yPos - 1)){
                 emptySpots.add(new EmptySpace(xPos, yPos - 1));
+            }
+            if(Board.CheckifOpenSpot(xPos, yPos - 2) && firstUniqueMove){
+                emptySpots.add(new EmptySpace(xPos, yPos - 2));
             }
             if(xPos + 1 < Board.BOARD_SIZE && yPos - 1 < Board.BOARD_SIZE && xPos + 1 >= 0 && yPos - 1 >= 0){
                 if(!Board.CheckifOpenSpot(xPos + 1, yPos - 1) && Board.GetPieceBoard(xPos + 1, yPos - 1).myPlayer != myPlayer){
@@ -52,6 +56,9 @@ public class Pawn extends Piece{
         if(myPlayer.getColor().equals(Color.white)){
             if(Board.CheckifOpenSpot(xPos, yPos + 1)){
                 emptySpots.add(new EmptySpace(xPos, yPos + 1));
+            }
+            if(Board.CheckifOpenSpot(xPos, yPos + 2) && firstUniqueMove){
+                emptySpots.add(new EmptySpace(xPos, yPos + 2));
             }
             if(xPos - 1 < Board.BOARD_SIZE && yPos + 1 < Board.BOARD_SIZE && xPos - 1 >= 0 && yPos + 1 >= 0){
                 if(!Board.CheckifOpenSpot(xPos - 1, yPos + 1) && Board.GetPieceBoard(xPos - 1, yPos + 1).myPlayer != myPlayer){

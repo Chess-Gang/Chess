@@ -21,6 +21,7 @@ public class Piece {
     public ArrayList<FullSpace> fullSpots = new ArrayList<FullSpace>();
     public Image pieceImage;
     public Player myPlayer;
+    public boolean firstUniqueMove = true;
     Piece(int x, int y, Player play){
         xPos = x;
         yPos =  y;

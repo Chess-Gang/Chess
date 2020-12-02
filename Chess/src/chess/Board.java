@@ -34,8 +34,8 @@ public class Board {
         allPieces.add(new Rook(7, 0, Player.players[0]));
         allPieces.add(new Knight(1, 0, Player.players[0]));
         allPieces.add(new Knight(6, 0, Player.players[0]));
-        allPieces.add(new Bishop(5, 0, Player.players[0], Bishop.Side.RIGHT));
-        allPieces.add(new Bishop(2, 0, Player.players[0], Bishop.Side.LEFT));
+        allPieces.add(new Bishop(5, 0, Player.players[0]));
+        allPieces.add(new Bishop(2, 0, Player.players[0]));
         for(int i = 0; i < NUM_ROWS; i++)
             allPieces.add(new Pawn(i, 1, Player.players[0]));
         
@@ -46,8 +46,8 @@ public class Board {
         allPieces.add(new Rook(7, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Knight(1, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Knight(6, NUM_ROWS - 1, Player.players[1]));
-        allPieces.add(new Bishop(5, NUM_ROWS - 1, Player.players[1], Bishop.Side.LEFT));
-        allPieces.add(new Bishop(2, NUM_ROWS - 1, Player.players[1], Bishop.Side.RIGHT));
+        allPieces.add(new Bishop(5, NUM_ROWS - 1, Player.players[1]));
+        allPieces.add(new Bishop(2, NUM_ROWS - 1, Player.players[1]));
         for(int i = 0; i < NUM_ROWS; i++)
             allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
         
@@ -80,6 +80,7 @@ public class Board {
                     board[space.xPos][space.yPos] = selectedPiece;
                     selectedPiece.xPos = space.xPos;
                     selectedPiece.yPos = space.yPos;
+                    selectedPiece.firstUniqueMove = false;
                     Player.SwitchTurn();
                 }
             }
