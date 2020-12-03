@@ -17,7 +17,7 @@ public class Chess extends JFrame implements Runnable {
     boolean animateFirstTime = true;
     Image image;
     Graphics2D g;
-    private static Button boardButton = new Button("Brown Board");
+    static Button randomize = new Button("Randomize");
     
     public static void main(String[] args) {
         Chess frame = new Chess();
@@ -26,22 +26,28 @@ public class Chess extends JFrame implements Runnable {
         //Create button to change board to brown
         //buttons may cause screen to go white in the build version or in the editor IF THIS HAPPENS just comment out this chunk of code starting here ending at frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
         //white screen is cause by the window.getwidth2() return the wrong nnumber because the buttons mess with it for some reason?
-        Button btnOK = new Button("Brown");
-        btnOK.addActionListener((ActionEvent e) -> {
+        Button brown = new Button("Brown");
+        brown.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BROWN);
             //JOptionPane.showMessageDialog(frame, "You've clicked OK button");
         });
         // Create button to change board to black
-        Button btnCancel = new Button("Black");
-        btnCancel.addActionListener((ActionEvent e) -> {
+        Button black = new Button("Black");
+        black.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BLACK);
             //JOptionPane.showMessageDialog(frame,"You've clicked Cancel button");
         });
+        randomize.addActionListener((ActionEvent e) -> {
+            Board.RandomizeBackRow();
+            //JOptionPane.showMessageDialog(frame, "You've clicked OK button");
+        });
         // Add buttons to a panel
+        //black.disable(); .disable()makes the button not be pushable
         JPanel buttonPanel = new JPanel( );
-        buttonPanel.add(btnOK);
-        buttonPanel.add(btnCancel);
-        frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
+        buttonPanel.add(brown);
+        buttonPanel.add(black);
+        buttonPanel.add(randomize);
+        frame.getContentPane( ).add(buttonPanel,BorderLayout.NORTH);
         
         
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
@@ -70,7 +76,8 @@ public class Chess extends JFrame implements Runnable {
                     reset();
                 }
                 if (e.BUTTON2 == e.getButton()) {
-                    reset();
+                    //reset();
+                    //Board.RandomizeBackRow();
                 }
                 repaint();
             }
@@ -166,6 +173,7 @@ public class Chess extends JFrame implements Runnable {
     
 /////////////////////////////////////////////////////////////////////////
     public void reset() {
+        Chess.randomize.enable();
         Player.Reset();
         Board.Reset();
     }

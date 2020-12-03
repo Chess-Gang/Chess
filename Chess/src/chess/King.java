@@ -35,7 +35,7 @@ public class King extends Piece{
         fullSpots.clear();
         boolean canCastle = true;
         //Casteling Checks
-        if(leftRook.firstUniqueMove && firstUniqueMove){
+        if(leftRook.firstUniqueMove && firstUniqueMove && !Board.randomized){
             for(int i =  xPos - 1; i > 0; i--){
                 if(!Board.CheckifOpenSpot(i, yPos))
                     canCastle = false;
@@ -47,7 +47,6 @@ public class King extends Piece{
         canCastle = true;
         if(rightRook.firstUniqueMove && firstUniqueMove){
             for(int i =  xPos + 1; i < 7; i++){
-                System.out.println("chess.King.SetPossibleMoves()");
                 if(!Board.CheckifOpenSpot(i, yPos))
                     canCastle = false;
             }

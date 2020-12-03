@@ -25,10 +25,9 @@ public class Board {
     private static BackroundType backType;
     private static ImageObserver observe;
     private static Piece selectedPiece;
-    private static int ydelta = Window.getHeight2()/NUM_ROWS;
-    private static int xdelta = Window.getWidth2()/NUM_COLUMNS;
     private static Clip clip;
-    private static boolean first;
+    public static boolean first;
+    public static boolean randomized;
     
     
     public static void Reset() {
@@ -43,7 +42,6 @@ public class Board {
         } catch (LineUnavailableException e) {
                 e.printStackTrace();
         }
-        first = true;
         backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
         backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
         backroundSquares[2] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
@@ -84,7 +82,99 @@ public class Board {
             allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
         
         UpdateBoard();
+        first = true;
+        randomized = false;
         winner = WinState.NO_WIN;
+    }
+    public static void RandomizeBackRow() {
+        
+        randomized = true;
+        allPieces.clear();
+        for (int zrow=0;zrow<NUM_ROWS;zrow++)
+            for (int zcol=0;zcol<NUM_COLUMNS;zcol++)
+                board[zrow][zcol] = null; 
+        
+        //player1's pieces (white)
+        int randVal = (int)(Math.random()*NUM_COLUMNS);
+        System.out.println(randVal);
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Queen(randVal, 0, Player.players[0]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        Rook _wleftRook = new Rook(randVal, 0, Player.players[0]);
+        allPieces.add(_wleftRook);
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        Rook _wrightRook = new Rook(randVal, 0, Player.players[0]);
+        allPieces.add(_wrightRook);
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new King(randVal, 0, Player.players[0], _wleftRook, _wrightRook));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Knight(randVal, 0, Player.players[0]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Knight(randVal, 0, Player.players[0]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Bishop(randVal, 0, Player.players[0]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, 0))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Bishop(randVal, 0, Player.players[0]));
+        UpdateBoard();
+        for(int i = 0; i < NUM_ROWS; i++)
+            allPieces.add(new Pawn(i, 1, Player.players[0]));
+        
+        //player2's pieces (black)
+        randVal = (int)(Math.random()*NUM_COLUMNS);
+        System.out.println(randVal);
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Queen(randVal, NUM_ROWS - 1, Player.players[1]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        Rook _bleftRook = new Rook(randVal, NUM_ROWS - 1, Player.players[1]);
+        allPieces.add(_bleftRook);
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        Rook _brightRook = new Rook(randVal, NUM_ROWS - 1, Player.players[1]);
+        allPieces.add(_brightRook);
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new King(randVal, NUM_ROWS - 1, Player.players[1], _wleftRook, _wrightRook));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Knight(randVal, NUM_ROWS - 1, Player.players[1]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Knight(randVal, NUM_ROWS - 1, Player.players[1]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Bishop(randVal, NUM_ROWS - 1, Player.players[1]));
+        UpdateBoard();
+        while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
+            randVal = (int)(Math.random()*NUM_COLUMNS);
+        allPieces.add(new Bishop(randVal, NUM_ROWS - 1, Player.players[1]));
+        UpdateBoard();
+        for(int i = 0; i < NUM_ROWS; i++)
+            allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
+        
+        UpdateBoard();
     }
     
     //move/select the piece the mouse clicked on
@@ -100,7 +190,7 @@ public class Board {
         for(Piece pec : allPieces){
             if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
-                if(pec.myPlayer == Player.GetCurrentPlayer()){
+                if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
                     selectedPiece = pec;
                 }
             }
@@ -116,6 +206,7 @@ public class Board {
                     selectedPiece.xPos = space.xPos;
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.firstUniqueMove = false;
+                    Chess.randomize.disable();
                     if(first){
                         first = false;
                         clip.start();
@@ -216,6 +307,8 @@ public class Board {
     }
     //return a piece based on x,y MOUSE coords
     public static Piece GetPieceMouse(int x,int y){
+        int ydelta = Window.getHeight2()/NUM_ROWS;
+        int xdelta = Window.getWidth2()/NUM_COLUMNS;
         for(Piece pec : allPieces){
             if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
@@ -234,6 +327,8 @@ public class Board {
     
     //Draw on the board.    
     public static void Draw(Graphics2D g) {
+        int ydelta = Window.getHeight2()/NUM_ROWS;
+        int xdelta = Window.getWidth2()/NUM_COLUMNS;
         for (int zrow=0;zrow<NUM_ROWS;zrow++)
         {
             for (int zcol=0;zcol<NUM_COLUMNS;zcol++)        
