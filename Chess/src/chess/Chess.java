@@ -11,6 +11,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.sound.sampled.*;
 
 public class Chess extends JFrame implements Runnable {
     boolean animateFirstTime = true;

@@ -3,7 +3,12 @@ package chess;
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.image.ImageObserver;
-import javax.swing.JButton;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.sampled.*;
 
 public class Board {
     public final static int BOARD_SIZE = 8;
@@ -22,9 +27,23 @@ public class Board {
     private static Piece selectedPiece;
     private static int ydelta = Window.getHeight2()/NUM_ROWS;
     private static int xdelta = Window.getWidth2()/NUM_COLUMNS;
+    private static Clip clip;
+    private static boolean first;
     
     
     public static void Reset() {
+        try {
+	AudioInputStream input=AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
+	clip=AudioSystem.getClip();
+	clip.open(input);
+        } catch (UnsupportedAudioFileException e) {
+                e.printStackTrace();
+        } catch (IOException e) {
+                e.printStackTrace();
+        } catch (LineUnavailableException e) {
+                e.printStackTrace();
+        }
+        first = true;
         backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
         backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
         backroundSquares[2] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
@@ -72,6 +91,7 @@ public class Board {
     public static void PickPiece(int x, int y){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
+        clip.drain();
         if(selectedPiece != null){
             selectedPiece.emptySpots.clear();
             selectedPiece.fullSpots.clear();
@@ -96,7 +116,15 @@ public class Board {
                     selectedPiece.xPos = space.xPos;
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.firstUniqueMove = false;
+                    if(first){
+                        first = false;
+                        clip.start();
+                    }
+                    else
+                        clip.loop(1);
+                    // play the audio clip with the audioplayer class
                     if(space.rook != null){
+                        space.rook.firstUniqueMove = false;
                         board[space.rook.xPos][space.rook.yPos] = null;
                         space.rook.xPos = space.rookXPos;
                         space.rook.yPos = space.rookYPos;
@@ -125,6 +153,7 @@ public class Board {
                     selectedPiece.xPos = space.xPos;
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.emptySpots.clear();
+                    clip.loop(1);
                     Player.SwitchTurn();
                     //UpdateBoard();
                 }
