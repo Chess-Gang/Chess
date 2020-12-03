@@ -82,4 +82,15 @@ public class Pawn extends Piece{
             g.fillOval(Window.getX(xDelta*(full.xPos) + possibleSpotSize/2),Window.getY(yDelta*(full.yPos) + possibleSpotSize/2),xDelta - possibleSpotSize,yDelta - possibleSpotSize);
         }
     }
+    public boolean MakeQueen(){
+        if(myPlayer.getColor().equals(Color.black)){
+            if(yPos == 0)
+                return(true);
+        }
+        else if(myPlayer.getColor().equals(Color.white)){
+            if(yPos == Board.BOARD_SIZE - 1)
+                return(true);
+        }
+        return(false);
+    }
 }

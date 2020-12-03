@@ -3,6 +3,7 @@ package chess;
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.image.ImageObserver;
+import javax.swing.JButton;
 
 public class Board {
     public final static int BOARD_SIZE = 8;
@@ -12,16 +13,24 @@ public class Board {
     private static ArrayList<Piece> allPieces = new ArrayList <Piece>();
     private enum WinState {NO_WIN,WIN_P1,WIN_P2,TIE};
     private static WinState winner;
-    public static Image backroundSquare1;
-    private static Image backroundSquare2;
+    private static Image curBoardSquare1;//current sqaures on display
+    private static Image curBoardSquare2;
+    private static Image backroundSquares[] = new Image[4];//1-2 brown, 3-4 black
+    public static enum BackroundType{BROWN, BLACK};
+    private static BackroundType backType;
     private static ImageObserver observe;
     private static Piece selectedPiece;
     private static int ydelta = Window.getHeight2()/NUM_ROWS;
     private static int xdelta = Window.getWidth2()/NUM_COLUMNS;
     
+    
     public static void Reset() {
-        backroundSquare1 = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
-        backroundSquare2 = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
+        backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
+        backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
+        backroundSquares[2] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
+        backroundSquares[3] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray light _1x.png");
+        if(backType == null)
+            SwitchBoardColor(BackroundType.BROWN);
         allPieces.clear();
         for (int zrow=0;zrow<NUM_ROWS;zrow++)
             for (int zcol=0;zcol<NUM_COLUMNS;zcol++)
@@ -57,16 +66,18 @@ public class Board {
     
     //move/select the piece the mouse clicked on
     public static void PickPiece(int x, int y){
+        int ydelta = Window.getHeight2()/NUM_ROWS;
+        int xdelta = Window.getWidth2()/NUM_COLUMNS;
         if(selectedPiece != null){
             selectedPiece.emptySpots.clear();
             selectedPiece.fullSpots.clear();
         }
+        //System.out.println(x + ", " + y);
         for(Piece pec : allPieces){
             if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                 if(pec.myPlayer == Player.GetCurrentPlayer()){
                     selectedPiece = pec;
-                    System.out.println(selectedPiece.getClass());
                 }
             }
         }
@@ -81,6 +92,17 @@ public class Board {
                     selectedPiece.xPos = space.xPos;
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.firstUniqueMove = false;
+                    if(selectedPiece instanceof Pawn){
+                        Pawn pawn = (Pawn)selectedPiece;
+                        if(pawn.MakeQueen()){//if a pawn gets to the end a queen is made
+                            int _x = selectedPiece.xPos;
+                            int _y = selectedPiece.yPos;
+                            Player play = selectedPiece.myPlayer;
+                            RemovePiece(selectedPiece);
+                            RemovePiece(pawn);
+                            allPieces.add(new Queen(_x, _y, play));
+                        }
+                    }
                     Player.SwitchTurn();
                 }
             }
@@ -99,6 +121,20 @@ public class Board {
             }
         }
     } 
+    
+    //changes the board tiles
+    public static void SwitchBoardColor(BackroundType type){
+        if(type.equals(backType.BROWN)){//changes it to brown
+            backType = BackroundType.BLACK;
+            curBoardSquare1 = backroundSquares[0];
+            curBoardSquare2 = backroundSquares[1];
+        }
+        else if(type.equals(backType.BLACK)){//cahnges it to grey
+            backType = BackroundType.BLACK;
+            curBoardSquare1 = backroundSquares[2];
+            curBoardSquare2 = backroundSquares[3];
+        }
+    }
     
     //update the board array
     public static void UpdateBoard(){ 
@@ -159,16 +195,14 @@ public class Board {
     
     //Draw on the board.    
     public static void Draw(Graphics2D g) {
-        int ydelta = Window.getHeight2()/NUM_ROWS;
-        int xdelta = Window.getWidth2()/NUM_COLUMNS;
         for (int zrow=0;zrow<NUM_ROWS;zrow++)
         {
             for (int zcol=0;zcol<NUM_COLUMNS;zcol++)        
             {
                 if((zrow + zcol) % 2 == 0)
-                    g.drawImage(backroundSquare1,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
+                    g.drawImage(curBoardSquare1,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
                 else
-                    g.drawImage(backroundSquare2,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
+                    g.drawImage(curBoardSquare2,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
             }
         }
     //draw possible moves
@@ -190,8 +224,7 @@ public class Board {
         {
             g.drawLine(Window.getX(zi*xdelta),Window.getY(0),
                     Window.getX(zi*xdelta),Window.getY(Window.getHeight2()));
-        }       
-
+        }
     //Display if a player has won.
         if (winner == WinState.WIN_P1) {
             g.setColor(Color.black);

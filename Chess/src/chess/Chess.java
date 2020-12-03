@@ -9,23 +9,51 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Chess extends JFrame implements Runnable {
     boolean animateFirstTime = true;
     Image image;
     Graphics2D g;
-
+    private static Button boardButton = new Button("Brown Board");
+    
     public static void main(String[] args) {
         Chess frame = new Chess();
+        
+        //Create button to change board to brown
+        Button btnOK = new Button("Brown");
+        btnOK.addActionListener((ActionEvent e) -> {
+            Board.SwitchBoardColor(Board.BackroundType.BROWN);
+            //JOptionPane.showMessageDialog(frame, "You've clicked OK button");
+        });
+        // Create button to change board to black
+        Button btnCancel = new Button("Black");
+        btnCancel.addActionListener((ActionEvent e) -> {
+            Board.SwitchBoardColor(Board.BackroundType.BLACK);
+            //JOptionPane.showMessageDialog(frame,"You've clicked Cancel button");
+        });
+        // Add buttons to a panel
+        JPanel buttonPanel = new JPanel( );
+        buttonPanel.add(btnOK);
+        buttonPanel.add(btnCancel);
+        frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
+
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
-
+    /*
+    public static void ShowButtons(){
+        frame.getContentPane().add(buttonPanel,BorderLayout.SOUTH);
+    }
+    public static void HidButtons(){
+        frame.getContentPane().remove(buttonPanel);
+    }
+    */
     public Chess() {
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-
                 if (e.BUTTON1 == e.getButton() ) {
                     int x = e.getX() - Window.getX(0);
                     int y = e.getY() - Window.getY(0);
@@ -110,7 +138,7 @@ public class Chess extends JFrame implements Runnable {
             gOld.drawImage(image, 0, 0, null);
             return;
         }
-              
+             
         Board.Draw(g);
         
         gOld.drawImage(image, 0, 0, null);
