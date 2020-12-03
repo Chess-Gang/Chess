@@ -38,9 +38,11 @@ public class Board {
         
         //player1's pieces (white)
         allPieces.add(new Queen(3, 0, Player.players[0]));
-        allPieces.add(new King(4, 0, Player.players[0]));
-        allPieces.add(new Rook(0, 0, Player.players[0]));
-        allPieces.add(new Rook(7, 0, Player.players[0]));
+        Rook _wleftRook = new Rook(0, 0, Player.players[0]);
+        allPieces.add(_wleftRook);
+        Rook _wrightRook = new Rook(7, 0, Player.players[0]);
+        allPieces.add(_wrightRook);
+        allPieces.add(new King(4, 0, Player.players[0], _wleftRook, _wrightRook));
         allPieces.add(new Knight(1, 0, Player.players[0]));
         allPieces.add(new Knight(6, 0, Player.players[0]));
         allPieces.add(new Bishop(5, 0, Player.players[0]));
@@ -50,9 +52,11 @@ public class Board {
         
         //player2's pieces (black)
         allPieces.add(new Queen(4, NUM_ROWS - 1, Player.players[1]));
-        allPieces.add(new King(3, NUM_ROWS - 1, Player.players[1]));
-        allPieces.add(new Rook(0, NUM_ROWS - 1, Player.players[1]));
-        allPieces.add(new Rook(7, NUM_ROWS - 1, Player.players[1]));
+        Rook _bleftRook = new Rook(0, NUM_ROWS - 1, Player.players[1]);
+        allPieces.add(_bleftRook);
+        Rook _brightRook = new Rook(7, NUM_ROWS - 1, Player.players[1]);
+        allPieces.add(_brightRook);
+        allPieces.add(new King(3, NUM_ROWS - 1, Player.players[1], _bleftRook, _brightRook));
         allPieces.add(new Knight(1, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Knight(6, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(5, NUM_ROWS - 1, Player.players[1]));
@@ -87,11 +91,17 @@ public class Board {
             for(EmptySpace space : selectedPiece.emptySpots){
                 if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
                    Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
-                    board[selectedPiece.xPos][selectedPiece.yPos] = null;
-                    board[space.xPos][space.yPos] = selectedPiece;
+                    board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
+                    board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
                     selectedPiece.xPos = space.xPos;
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.firstUniqueMove = false;
+                    if(space.rook != null){
+                        board[space.rook.xPos][space.rook.yPos] = null;
+                        space.rook.xPos = space.rookXPos;
+                        space.rook.yPos = space.rookYPos;
+                        board[space.rook.xPos][space.rook.yPos] = space.rook;
+                    }
                     if(selectedPiece instanceof Pawn){
                         Pawn pawn = (Pawn)selectedPiece;
                         if(pawn.MakeQueen()){//if a pawn gets to the end a queen is made

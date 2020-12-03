@@ -12,9 +12,19 @@ package chess;
 public class EmptySpace {
     public int xPos;
     public int yPos;
+    public Rook rook;
+    public int rookXPos;
+    public int rookYPos;
 
     EmptySpace(int x, int y) {
         xPos = x;
         yPos = y;
+    }
+    EmptySpace(int x, int y, int x2, int y2, Rook _rook) {
+        xPos = x;
+        yPos = y;
+        rookXPos = x2;
+        rookYPos = y2;
+        rook = _rook;
     }
 }

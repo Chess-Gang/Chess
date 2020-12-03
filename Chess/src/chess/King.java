@@ -15,13 +15,17 @@ import java.awt.Toolkit;
  * @author Conner
  */
 public class King extends Piece{
+    Rook leftRook;
+    Rook rightRook;
     
-    King(int x, int y, Player play){
+    King(int x, int y, Player play, Rook _rook1, Rook _rook2){
         super(x,y,play);
         if(myPlayer.getColor().equals(Color.white))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_king_1x.png");
         else
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_king_1x.png");
+        leftRook = _rook1;
+        rightRook = _rook2;
     }
     public Image GetImage(){
         return(pieceImage);
@@ -29,8 +33,32 @@ public class King extends Piece{
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
         fullSpots.clear();
+        boolean canCastle = true;
+        //Casteling Checks
+        if(leftRook.firstUniqueMove && firstUniqueMove){
+            for(int i =  xPos - 1; i > 0; i--){
+                if(!Board.CheckifOpenSpot(i, yPos))
+                    canCastle = false;
+            }
+            if(canCastle){
+                emptySpots.add(new EmptySpace(xPos - 2, yPos, xPos - 1, yPos, leftRook));
+            }
+        }
+        canCastle = true;
+        if(rightRook.firstUniqueMove && firstUniqueMove){
+            for(int i =  xPos + 1; i < 7; i++){
+                System.out.println("chess.King.SetPossibleMoves()");
+                if(!Board.CheckifOpenSpot(i, yPos))
+                    canCastle = false;
+            }
+            if(canCastle){
+                emptySpots.add(new EmptySpace(xPos + 2, yPos, xPos + 1, yPos, rightRook));
+            }
+        }
+        
+        //going clockwise around the king to check open spots
         if(xPos - 1 < Board.BOARD_SIZE && yPos - 1 < Board.BOARD_SIZE && xPos - 1 >= 0 && yPos - 1 >= 0){
-            if(Board.CheckifOpenSpot(xPos - 1, yPos - 1)){        //going clockwise around the king to check open spots
+            if(Board.CheckifOpenSpot(xPos - 1, yPos - 1)){        
                 emptySpots.add(new EmptySpace(xPos - 1, yPos - 1));
             }
             else if(!Board.CheckifOpenSpot(xPos - 1, yPos - 1) && Board.GetPieceBoard(xPos - 1, yPos - 1).myPlayer != myPlayer){

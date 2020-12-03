@@ -21,7 +21,10 @@ public class Chess extends JFrame implements Runnable {
     public static void main(String[] args) {
         Chess frame = new Chess();
         
+        
         //Create button to change board to brown
+        //buttons may cause screen to go white in the build version or in the editor IF THIS HAPPENS just comment out this chunk of code starting here ending at frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
+        //white screen is cause by the window.getwidth2() return the wrong nnumber because the buttons mess with it for some reason?
         Button btnOK = new Button("Brown");
         btnOK.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BROWN);
@@ -38,12 +41,13 @@ public class Chess extends JFrame implements Runnable {
         buttonPanel.add(btnOK);
         buttonPanel.add(btnCancel);
         frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
-
+        
+        
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
-    /*
+    /* ignore these methods for now i was thinking of maybe adding in a menu that can be opened and closed but for now just leave them
     public static void ShowButtons(){
         frame.getContentPane().add(buttonPanel,BorderLayout.SOUTH);
     }
