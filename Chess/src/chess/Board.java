@@ -42,10 +42,10 @@ public class Board {
         } catch (LineUnavailableException e) {
                 e.printStackTrace();
         }
-        backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
-        backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
-        backroundSquares[2] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
-        backroundSquares[3] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray light _1x.png");
+        backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
+        backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
+        backroundSquares[3] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
+        backroundSquares[2] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray light _1x.png");
         if(backType == null)
             SwitchBoardColor(BackroundType.BROWN);
         allPieces.clear();
@@ -195,8 +195,11 @@ public class Board {
                 }
             }
         }
-        if(selectedPiece != null)
+        if(selectedPiece != null){
             selectedPiece.SetPossibleMoves(xdelta, ydelta);
+            if(selectedPiece.takenPiece != null)//remove overlapping empty spaces
+                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+        }
         if(selectedPiece != null && selectedPiece.myPlayer == Player.GetCurrentPlayer()){
             for(EmptySpace space : selectedPiece.emptySpots){
                 if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
@@ -207,13 +210,13 @@ public class Board {
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.firstUniqueMove = false;
                     Chess.randomize.disable();
+                    selectedPiece.takenPiece = null;
                     if(first){
                         first = false;
                         clip.start();
                     }
                     else
                         clip.loop(1);
-                    // play the audio clip with the audioplayer class
                     if(space.rook != null){
                         space.rook.firstUniqueMove = false;
                         board[space.rook.xPos][space.rook.yPos] = null;
@@ -229,15 +232,21 @@ public class Board {
                             Player play = selectedPiece.myPlayer;
                             RemovePiece(selectedPiece);
                             RemovePiece(pawn);
-                            allPieces.add(new Queen(_x, _y, play));
+                            Queen Q = new Queen(_x, _y, play);
+                            allPieces.add(Q);
+                            board[_x][_y] = Q;
+                            Player.SwitchTurn();
+                            return;
                         }
                     }
                     Player.SwitchTurn();
+                    return;
                 }
             }
             for(FullSpace space : selectedPiece.fullSpots){
                 if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
                    Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
+                    selectedPiece.takenPiece = GetPieceMouse(x, y).myPieceType;
                     RemovePiece(GetPieceMouse(x, y));
                     board[selectedPiece.xPos][selectedPiece.yPos] = null;
                     board[space.xPos][space.yPos] = selectedPiece;
@@ -245,7 +254,23 @@ public class Board {
                     selectedPiece.yPos = space.yPos;
                     selectedPiece.emptySpots.clear();
                     clip.loop(1);
+                    if(selectedPiece instanceof Pawn){
+                        Pawn pawn = (Pawn)selectedPiece;
+                        if(pawn.MakeQueen()){//if a pawn gets to the end a queen is made
+                            int _x = selectedPiece.xPos;
+                            int _y = selectedPiece.yPos;
+                            Player play = selectedPiece.myPlayer;
+                            RemovePiece(selectedPiece);
+                            RemovePiece(pawn);
+                            Queen Q = new Queen(_x, _y, play);
+                            allPieces.add(Q);
+                            board[_x][_y] = Q;
+                            Player.SwitchTurn();
+                            return;
+                        }
+                    }
                     Player.SwitchTurn();
+                    return;
                     //UpdateBoard();
                 }
             }

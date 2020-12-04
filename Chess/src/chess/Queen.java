@@ -17,6 +17,7 @@ import java.awt.Toolkit;
 public class Queen extends Piece{
     Queen(int x, int y, Player play){
         super(x,y,play);
+        myPieceType = Piece.pieceType.QUEEN;
         if(myPlayer.getColor().equals(Color.white))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_queen_1x.png");
         else

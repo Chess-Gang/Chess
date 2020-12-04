@@ -20,6 +20,7 @@ public class King extends Piece{
     
     King(int x, int y, Player play, Rook _rook1, Rook _rook2){
         super(x,y,play);
+        myPieceType = Piece.pieceType.KING;
         if(myPlayer.getColor().equals(Color.white))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_king_1x.png");
         else

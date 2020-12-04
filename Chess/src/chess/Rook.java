@@ -18,6 +18,7 @@ public class Rook extends Piece{
     
     Rook(int x, int y, Player play){
         super(x,y,play);
+        myPieceType = Piece.pieceType.ROOK;
         if(myPlayer.getColor().equals(Color.white))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_rook_1x.png");
         else

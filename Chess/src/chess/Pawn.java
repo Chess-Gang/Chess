@@ -22,6 +22,7 @@ public class Pawn extends Piece{
     
     Pawn(int x, int y, Player play){
         super(x,y,play);
+        myPieceType = Piece.pieceType.PAWN;
         if(myPlayer.getColor().equals(Color.white))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_pawn_1x.png");
         else
