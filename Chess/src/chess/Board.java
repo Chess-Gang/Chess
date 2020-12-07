@@ -1,5 +1,6 @@
 package chess;
 
+import static chess.Player.players;
 import static chess.Piece.observe;
 import java.awt.*;
 import java.util.ArrayList;
@@ -432,7 +433,15 @@ public class Board {
             g.setFont(new Font("Arial",Font.PLAIN,20));
             g.drawString("It is a tie",40,65);                
         }
+        
+        //adds current player to top
+        if(Player.GetCurrentPlayer() == players[0])
+            g.drawString("White's turn",40,65);
+        else
+            g.drawString("Blacks's turn",40,65);
+        
     }
+    
     public static void DrawPiece() {
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
