@@ -16,12 +16,15 @@ import javax.sound.sampled.*;
 public class Chess extends JFrame implements Runnable {
     boolean animateFirstTime = true;
     Image image;
-    Graphics2D g;
+    static Graphics2D g;
+    String[] letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
     static Button randomize = new Button("Randomize");
+    static boolean menuUp;
+    static Chess frame;
+    static JPanel buttonPanel;
     
     public static void main(String[] args) {
-        Chess frame = new Chess();
-        
+        frame = new Chess();
         
         //Create button to change board to brown
         //buttons may cause screen to go white in the build version or in the editor IF THIS HAPPENS just comment out this chunk of code starting here ending at frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
@@ -43,25 +46,25 @@ public class Chess extends JFrame implements Runnable {
         });
         // Add buttons to a panel
         //black.disable(); .disable()makes the button not be pushable
-        JPanel buttonPanel = new JPanel( );
+        buttonPanel = new JPanel( );
         buttonPanel.add(brown);
         buttonPanel.add(black);
         buttonPanel.add(randomize);
-        frame.getContentPane( ).add(buttonPanel,BorderLayout.NORTH);
+        frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         
-        
+        frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
-    /* ignore these methods for now i was thinking of maybe adding in a menu that can be opened and closed but for now just leave them
-    public static void ShowButtons(){
-        frame.getContentPane().add(buttonPanel,BorderLayout.SOUTH);
+    // ignore these methods for now i was thinking of maybe adding in a menu that can be opened and closed but for now just leave them
+    public static void MenuChange(){
+        menuUp = !menuUp;
+        if(menuUp)
+            frame.getContentPane().remove(buttonPanel);
+        else
+            frame.getContentPane().add(buttonPanel,BorderLayout.SOUTH);
     }
-    public static void HidButtons(){
-        frame.getContentPane().remove(buttonPanel);
-    }
-    */
     public Chess() {
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -76,37 +79,33 @@ public class Chess extends JFrame implements Runnable {
                     reset();
                 }
                 if (e.BUTTON2 == e.getButton()) {
+                    Chess.MenuChange();
                     //reset();
-                    //Board.RandomizeBackRow();
                 }
                 repaint();
             }
         });
-            
+        addMouseMotionListener(new MouseMotionAdapter() {
+          public void mouseDragged(MouseEvent e) {
 
-    addMouseMotionListener(new MouseMotionAdapter() {
-      public void mouseDragged(MouseEvent e) {
+            //repaint();
+          }
+        });
+        addMouseMotionListener(new MouseMotionAdapter() {
+          public void mouseMoved(MouseEvent e) {
 
-        repaint();
-      }
-    });
-
-    addMouseMotionListener(new MouseMotionAdapter() {
-      public void mouseMoved(MouseEvent e) {
-
-        repaint();
-      }
-    });
-
-        addKeyListener(new KeyAdapter() {
-
+            //repaint();
+          }
+        });
+        addKeyListener(new KeyAdapter() {//not registering keys, need to fix it
             public void keyPressed(KeyEvent e) {
                 if (e.VK_UP == e.getKeyCode()) {
                 } else if (e.VK_DOWN == e.getKeyCode()) {
                 } else if (e.VK_LEFT == e.getKeyCode()) {
                 } else if (e.VK_RIGHT == e.getKeyCode()) {
                 } else if (e.VK_ESCAPE == e.getKeyCode()) {
-                    reset();
+                    Chess.MenuChange();
+                    //reset();
                 }
                 repaint();
             }
@@ -149,9 +148,15 @@ public class Chess extends JFrame implements Runnable {
         if (animateFirstTime) {
             gOld.drawImage(image, 0, 0, null);
             return;
-        }    
+        }
         Board.Draw(g);
-        
+        for (int zi = 0;zi<Board.BOARD_SIZE;zi++)
+        {
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial",Font.PLAIN,15));
+            g.drawString(letters[zi], zi*(Window.getWidth2() / Board.BOARD_SIZE) + 40, Window.getY(-2));
+            g.drawString(Integer.toString(zi + 1),Window.getX(-10), zi*(Window.getHeight2()/ Board.BOARD_SIZE) + 95);
+        }
         gOld.drawImage(image, 0, 0, null);
     }
 
@@ -161,7 +166,8 @@ public class Chess extends JFrame implements Runnable {
         while (true) {
             animate();
             repaint();
-            double seconds = .1;    //time that 1 frame takes.
+            double fps = 150;//150
+            double seconds = 1/fps;    //time that 1 frame takes. //.1 = 10fps
             int miliseconds = (int) (1000.0 * seconds);
             try {
                 Thread.sleep(miliseconds);

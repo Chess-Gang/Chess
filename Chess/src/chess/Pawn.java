@@ -9,17 +9,20 @@ package chess;
  *
  * @author Conner
  */
+import static chess.Board.graphic;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Conner
  */
 public class Pawn extends Piece{
-    
+    int a =0;
     Pawn(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.PAWN;
@@ -39,7 +42,7 @@ public class Pawn extends Piece{
             if(Board.CheckifOpenSpot(xPos, yPos - 1)){
                 emptySpots.add(new EmptySpace(xPos, yPos - 1));
             }
-            if(Board.CheckifOpenSpot(xPos, yPos - 2) && firstUniqueMove){
+            if(Board.CheckifOpenSpot(xPos, yPos - 2) && Board.CheckifOpenSpot(xPos, yPos - 1) && firstUniqueMove){
                 emptySpots.add(new EmptySpace(xPos, yPos - 2));
             }
             if(xPos + 1 < Board.BOARD_SIZE && yPos - 1 < Board.BOARD_SIZE && xPos + 1 >= 0 && yPos - 1 >= 0){
@@ -58,7 +61,7 @@ public class Pawn extends Piece{
             if(Board.CheckifOpenSpot(xPos, yPos + 1)){
                 emptySpots.add(new EmptySpace(xPos, yPos + 1));
             }
-            if(Board.CheckifOpenSpot(xPos, yPos + 2) && firstUniqueMove){
+            if(Board.CheckifOpenSpot(xPos, yPos + 2) &&  Board.CheckifOpenSpot(xPos, yPos + 1) && firstUniqueMove){
                 emptySpots.add(new EmptySpace(xPos, yPos + 2));
             }
             if(xPos - 1 < Board.BOARD_SIZE && yPos + 1 < Board.BOARD_SIZE && xPos - 1 >= 0 && yPos + 1 >= 0){
@@ -93,5 +96,24 @@ public class Pawn extends Piece{
                 return(true);
         }
         return(false);
+    }
+    public void Move(int xdelta,int ydelta, Graphics2D g){
+        g.drawImage(pieceImage,Window.getX(xPos),Window.getY(yPos),xdelta + 4,ydelta + 4,observe);
+        if(yPos != desiredY * ydelta || xPos != desiredX * xdelta){
+            if(yPos < desiredY * ydelta && a % 9 != 8)
+                yPos++;
+            else if(yPos > desiredY * ydelta && a % 9 != 8)
+                yPos--;
+            if(xPos< desiredX * xdelta)
+                xPos++;
+            else if(xPos> desiredX * xdelta)
+                xPos--;
+            a++;
+        }
+        else{
+            yPos = desiredY;
+            xPos = desiredX;
+            Board.EndMovement(1);
+        }
     }
 }

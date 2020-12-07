@@ -9,17 +9,19 @@ package chess;
  *
  * @author Conner
  */
+import static chess.Piece.observe;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Conner
  */
 public class Knight extends Piece{
-    
     Knight(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.KNIGHT;
@@ -89,6 +91,24 @@ public class Knight extends Piece{
         for(FullSpace full : fullSpots){
             g.setColor(Color.red);
             g.fillOval(Window.getX(xDelta*(full.xPos) + possibleSpotSize/2),Window.getY(yDelta*(full.yPos) + possibleSpotSize/2),xDelta - possibleSpotSize,yDelta - possibleSpotSize);
+        }
+    }
+    public void Move(int xdelta,int ydelta, Graphics2D g){
+        g.drawImage(pieceImage,Window.getX(xPos),Window.getY(yPos),xdelta + 4,ydelta + 4,observe);
+        if(yPos != desiredY * ydelta || xPos != desiredX * xdelta){
+            if(yPos < desiredY * ydelta)
+                yPos++;
+            else if(yPos > desiredY * ydelta)
+                yPos--;
+            else if(xPos< desiredX * xdelta)
+                xPos++;
+            else if(xPos> desiredX * xdelta)
+                xPos--;
+        }
+        else{
+            yPos = desiredY;
+            xPos = desiredX;
+            Board.EndMovement(1);
         }
     }
 }

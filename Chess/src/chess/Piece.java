@@ -8,6 +8,7 @@ package chess;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 
 /**
@@ -26,17 +27,35 @@ public class Piece {
     public enum pieceType{KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN};
     public pieceType takenPiece;
     public pieceType myPieceType;
+    public boolean moving;
+    public int oldX;
+    public int oldY;
+    int desiredX;
+    int desiredY;
+    static ImageObserver observe;
     Piece(int x, int y, Player play){
         xPos = x;
         yPos =  y;
         myPlayer = play;
+        moving  = false;
     }
     public void DrawPossibleMoves(Graphics2D g, int xDelta, int yDelta){
-        
+    }
+    public void SetMove(int _desiredX, int _desiredY, int xDelta, int yDelta){
+        desiredX = _desiredX;
+        desiredY = _desiredY;
+        oldX = xPos;
+        oldY = yPos;
+        //System.out.println(xDelta + "," + yDelta);
+        xPos *= xDelta;
+        yPos *= yDelta;
+        moving = true;
+    }
+    public void Move(int desiredX, int desiredY, Graphics2D g){
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
-        
-    }public void SetPossibleMoves(int xDelta, int yDelta, pieceType type){
+    }
+    public void SetPossibleMoves(int xDelta, int yDelta, pieceType type){
         boolean stopCheck = false;
         int z = 0;
         switch (type) {

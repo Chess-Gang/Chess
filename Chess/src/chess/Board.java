@@ -1,17 +1,17 @@
 package chess;
 
+import static chess.Piece.observe;
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.image.ImageObserver;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.*;
 
 public class Board {
-    public final static int BOARD_SIZE = 8;
+    public final static int BOARD_SIZE = 8;//12 for 4 player
     private final static int NUM_ROWS = BOARD_SIZE;
     private final static int NUM_COLUMNS = BOARD_SIZE;
     private static Piece board[][] = new Piece[NUM_ROWS][NUM_COLUMNS];
@@ -25,14 +25,15 @@ public class Board {
     private static BackroundType backType;
     private static ImageObserver observe;
     private static Piece selectedPiece;
+    private static Piece removePiece;
     private static Clip clip;
     public static boolean first;
     public static boolean randomized;
+    static Graphics2D graphic;
     
-    
-    public static void Reset() {
+    public static void Reset() {//fix double playing sound at first move
         try {
-	AudioInputStream input=AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
+	AudioInputStream input = AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
 	clip=AudioSystem.getClip();
 	clip.open(input);
         } catch (UnsupportedAudioFileException e) {
@@ -64,8 +65,8 @@ public class Board {
         allPieces.add(new Knight(6, 0, Player.players[0]));
         allPieces.add(new Bishop(5, 0, Player.players[0]));
         allPieces.add(new Bishop(2, 0, Player.players[0]));
-        for(int i = 0; i < NUM_ROWS; i++)
-            allPieces.add(new Pawn(i, 1, Player.players[0]));
+        //for(int i = 0; i < NUM_ROWS; i++)
+            //allPieces.add(new Pawn(i, 1, Player.players[0]));
         
         //player2's pieces (black)
         allPieces.add(new Queen(4, NUM_ROWS - 1, Player.players[1]));
@@ -78,13 +79,15 @@ public class Board {
         allPieces.add(new Knight(6, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(5, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(2, NUM_ROWS - 1, Player.players[1]));
-        for(int i = 0; i < NUM_ROWS; i++)
-            allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
+        //for(int i = 0; i < NUM_ROWS; i++)
+            //allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
         
         UpdateBoard();
         first = true;
         randomized = false;
         winner = WinState.NO_WIN;
+        selectedPiece = null;
+        removePiece = null;
     }
     public static void RandomizeBackRow() {
         
@@ -96,7 +99,6 @@ public class Board {
         
         //player1's pieces (white)
         int randVal = (int)(Math.random()*NUM_COLUMNS);
-        System.out.println(randVal);
         while(!Board.CheckifOpenSpot(randVal, 0))
             randVal = (int)(Math.random()*NUM_COLUMNS);
         allPieces.add(new Queen(randVal, 0, Player.players[0]));
@@ -136,7 +138,6 @@ public class Board {
         
         //player2's pieces (black)
         randVal = (int)(Math.random()*NUM_COLUMNS);
-        System.out.println(randVal);
         while(!Board.CheckifOpenSpot(randVal, NUM_ROWS - 1))
             randVal = (int)(Math.random()*NUM_COLUMNS);
         allPieces.add(new Queen(randVal, NUM_ROWS - 1, Player.players[1]));
@@ -182,23 +183,30 @@ public class Board {
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
         clip.drain();
-        if(selectedPiece != null){
-            selectedPiece.emptySpots.clear();
-            selectedPiece.fullSpots.clear();
-        }
         //System.out.println(x + ", " + y);
         for(Piece pec : allPieces){
             if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                 if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
-                    selectedPiece = pec;
+                    if(selectedPiece != null)
+                        if(!selectedPiece.moving){
+                            selectedPiece = pec;
+                            selectedPiece.emptySpots.clear();
+                            selectedPiece.fullSpots.clear();
+                            selectedPiece.SetPossibleMoves(xdelta, ydelta);
+                            if(selectedPiece.takenPiece != null)
+                                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                    }
+                    if(selectedPiece == null){
+                        selectedPiece = pec;
+                        selectedPiece.emptySpots.clear();
+                        selectedPiece.fullSpots.clear();
+                        selectedPiece.SetPossibleMoves(xdelta, ydelta);
+                        if(selectedPiece.takenPiece != null)
+                            selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                    }
                 }
             }
-        }
-        if(selectedPiece != null){
-            selectedPiece.SetPossibleMoves(xdelta, ydelta);
-            if(selectedPiece.takenPiece != null)//remove overlapping empty spaces
-                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
         }
         if(selectedPiece != null && selectedPiece.myPlayer == Player.GetCurrentPlayer()){
             for(EmptySpace space : selectedPiece.emptySpots){
@@ -206,27 +214,9 @@ public class Board {
                    Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
                     board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
                     board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
-                    selectedPiece.xPos = space.xPos;
-                    selectedPiece.yPos = space.yPos;
-                    selectedPiece.firstUniqueMove = false;
-                    Chess.randomize.disable();
-                    selectedPiece.takenPiece = null;
-                    if(first){
-                        first = false;
-                        clip.start();
-                    }
-                    else
-                        clip.loop(1);
-                    if(space.rook != null){
-                        space.rook.firstUniqueMove = false;
-                        board[space.rook.xPos][space.rook.yPos] = null;
-                        space.rook.xPos = space.rookXPos;
-                        space.rook.yPos = space.rookYPos;
-                        board[space.rook.xPos][space.rook.yPos] = space.rook;
-                    }
-                    if(selectedPiece instanceof Pawn){
+                    if(selectedPiece instanceof Pawn){//if a pawn gets to the end a queen is made
                         Pawn pawn = (Pawn)selectedPiece;
-                        if(pawn.MakeQueen()){//if a pawn gets to the end a queen is made
+                        if(pawn.MakeQueen()){
                             int _x = selectedPiece.xPos;
                             int _y = selectedPiece.yPos;
                             Player play = selectedPiece.myPlayer;
@@ -235,11 +225,24 @@ public class Board {
                             Queen Q = new Queen(_x, _y, play);
                             allPieces.add(Q);
                             board[_x][_y] = Q;
-                            Player.SwitchTurn();
+                            //Player.SwitchTurn();
                             return;
                         }
                     }
-                    Player.SwitchTurn();
+                    selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
+                    //selectedPiece.xPos = space.xPos;
+                    //selectedPiece.yPos = space.yPos;
+                    selectedPiece.firstUniqueMove = false;
+                    selectedPiece.takenPiece = null;
+                    Chess.randomize.disable();
+                    if(space.rook != null){//moves the rook when casteling
+                        space.rook.firstUniqueMove = false;
+                        board[space.rook.xPos][space.rook.yPos] = null;
+                        space.rook.xPos = space.rookXPos;
+                        space.rook.yPos = space.rookYPos;
+                        board[space.rook.xPos][space.rook.yPos] = space.rook;
+                    }
+                    //Player.SwitchTurn();
                     return;
                 }
             }
@@ -247,13 +250,9 @@ public class Board {
                 if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
                    Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
                     selectedPiece.takenPiece = GetPieceMouse(x, y).myPieceType;
-                    RemovePiece(GetPieceMouse(x, y));
-                    board[selectedPiece.xPos][selectedPiece.yPos] = null;
-                    board[space.xPos][space.yPos] = selectedPiece;
-                    selectedPiece.xPos = space.xPos;
-                    selectedPiece.yPos = space.yPos;
-                    selectedPiece.emptySpots.clear();
-                    clip.loop(1);
+                    removePiece = GetPieceMouse(x, y);
+                    board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
+                    board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
                     if(selectedPiece instanceof Pawn){
                         Pawn pawn = (Pawn)selectedPiece;
                         if(pawn.MakeQueen()){//if a pawn gets to the end a queen is made
@@ -265,11 +264,14 @@ public class Board {
                             Queen Q = new Queen(_x, _y, play);
                             allPieces.add(Q);
                             board[_x][_y] = Q;
-                            Player.SwitchTurn();
+                            //Player.SwitchTurn();
                             return;
                         }
                     }
-                    Player.SwitchTurn();
+                    selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
+                    //selectedPiece.xPos = space.xPos;
+                    //selectedPiece.yPos = space.yPos;
+                    //Player.SwitchTurn();
                     return;
                     //UpdateBoard();
                 }
@@ -298,12 +300,16 @@ public class Board {
         }
     }
     
-    //Remove a piece based off of x,y coords
+    //Remove a piece based off of x,y coords also decided if game has been won
     public static void RemovePiece(int x,int y){
         Piece piecToRemove = null;
         for(Piece pec : allPieces){
             if(pec.xPos == x && pec.yPos == y){
                 piecToRemove = pec;
+                if(pec instanceof King && pec.myPlayer.getColor().equals(Color.black))//Gives win to player1
+                    winner = WinState.WIN_P1;
+                else if(pec instanceof King && pec.myPlayer.getColor().equals(Color.white))//gives win to player2
+                    winner = WinState.WIN_P2;
             }
         }
         board[piecToRemove.xPos][piecToRemove.yPos] = null;
@@ -315,7 +321,6 @@ public class Board {
             winner = WinState.WIN_P1;
         else if(pec instanceof King && pec.myPlayer.getColor().equals(Color.white))//gives win to player2
             winner = WinState.WIN_P2;
-        board[pec.xPos][pec.yPos] = null;
         allPieces.remove(pec);
     }
     
@@ -329,6 +334,23 @@ public class Board {
             }
         }
         return(piecToReturn);
+    }
+    //play the audio and reset the selected piece
+    public static void EndMovement(int i ){
+        if(first){
+            first = false;
+            clip.start();
+        }
+        else
+            clip.loop(i);
+        selectedPiece.moving = false;
+        selectedPiece.emptySpots.clear();
+        selectedPiece.fullSpots.clear();
+        if(removePiece != null)
+            RemovePiece(removePiece);
+        removePiece = null;
+        selectedPiece = null;
+        Player.SwitchTurn();
     }
     //return a piece based on x,y MOUSE coords
     public static Piece GetPieceMouse(int x,int y){
@@ -354,6 +376,7 @@ public class Board {
     public static void Draw(Graphics2D g) {
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
+        graphic = g;
         for (int zrow=0;zrow<NUM_ROWS;zrow++)
         {
             for (int zcol=0;zcol<NUM_COLUMNS;zcol++)        
@@ -363,13 +386,6 @@ public class Board {
                 else
                     g.drawImage(curBoardSquare2,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
             }
-        }
-    //draw possible moves
-        if(selectedPiece != null && selectedPiece.myPlayer == Player.GetCurrentPlayer())
-            selectedPiece.DrawPossibleMoves(g,xdelta,ydelta);
-    //draw the pieces
-        for(Piece pec : allPieces){
-            g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
         }
     //Draw the grid.        
         g.setColor(Color.black);
@@ -384,6 +400,20 @@ public class Board {
             g.drawLine(Window.getX(zi*xdelta),Window.getY(0),
                     Window.getX(zi*xdelta),Window.getY(Window.getHeight2()));
         }
+    //draw possible moves
+        boolean activePiece = selectedPiece != null;
+        if(activePiece && selectedPiece.myPlayer == Player.GetCurrentPlayer() && !selectedPiece.moving)
+            selectedPiece.DrawPossibleMoves(g,xdelta,ydelta);
+    //draw the pieces
+        for(Piece pec : allPieces){
+            if(pec != selectedPiece)
+                g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+            else if(!selectedPiece.moving)
+                g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+        }
+    //Run the animation method
+        if(activePiece && selectedPiece.moving)
+            selectedPiece.Move(xdelta, ydelta, g);
     //Display if a player has won.
         if (winner == WinState.WIN_P1) {
             g.setColor(Color.black);
@@ -402,5 +432,14 @@ public class Board {
             g.setFont(new Font("Arial",Font.PLAIN,20));
             g.drawString("It is a tie",40,65);                
         }
+    }
+    public static void DrawPiece() {
+        int ydelta = Window.getHeight2()/NUM_ROWS;
+        int xdelta = Window.getWidth2()/NUM_COLUMNS;
+        Board.Draw(graphic);
+        graphic.setColor(Color.red);
+        graphic.fillRect(xdelta, ydelta, 200, 200);
+        graphic.drawImage(selectedPiece.pieceImage,Window.getX(xdelta*selectedPiece.xPos),Window.getY(ydelta*selectedPiece.yPos),xdelta + 4,ydelta + 4,observe);
+        //*/
     }
 }

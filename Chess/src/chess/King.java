@@ -5,10 +5,13 @@
  */
 package chess;
 
+import static chess.Piece.observe;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,6 +20,7 @@ import java.awt.Toolkit;
 public class King extends Piece{
     Rook leftRook;
     Rook rightRook;
+    int a = 0;
     
     King(int x, int y, Player play, Rook _rook1, Rook _rook2){
         super(x,y,play);
@@ -137,6 +141,25 @@ public class King extends Piece{
         for(FullSpace full : fullSpots){
             g.setColor(Color.red);
             g.fillOval(Window.getX(xDelta*(full.xPos) + possibleSpotSize/2),Window.getY(yDelta*(full.yPos) + possibleSpotSize/2),xDelta - possibleSpotSize,yDelta - possibleSpotSize);
+        }
+    }
+    public void Move(int xdelta,int ydelta, Graphics2D g){
+        g.drawImage(pieceImage,Window.getX(xPos),Window.getY(yPos),xdelta + 4,ydelta + 4,observe);
+        if(yPos != desiredY * ydelta || xPos != desiredX * xdelta){
+            if(yPos < desiredY * ydelta && a % 9 != 8)
+                yPos++;
+            else if(yPos > desiredY * ydelta && a % 9 != 8)
+                yPos--;
+            if(xPos< desiredX * xdelta)
+                xPos++;
+            else if(xPos> desiredX * xdelta)
+                xPos--;
+            a++;
+        }
+        else{
+            yPos = desiredY;
+            xPos = desiredX;
+            Board.EndMovement(1);
         }
     }
 }
