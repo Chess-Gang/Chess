@@ -29,7 +29,12 @@ public class Board {
     private static Clip clip;
     public static boolean first;
     public static boolean randomized;
+    private static enum CheckState {P1_CHECK, P2_CHECK};
+    private static CheckState inCheck;
     static Graphics2D graphic;
+    static int counter;
+    static int pieceSize1;
+    static int pieceSize2;
     
     public static void Reset() {//fix double playing sound at first move
         try {
@@ -55,18 +60,18 @@ public class Board {
                 board[zrow][zcol] = null; 
         
         //player1's pieces (white)
-        allPieces.add(new Queen(3, 0, Player.players[0]));
+        allPieces.add(new Queen(4, 0, Player.players[0]));
         Rook _wleftRook = new Rook(0, 0, Player.players[0]);
         allPieces.add(_wleftRook);
         Rook _wrightRook = new Rook(7, 0, Player.players[0]);
         allPieces.add(_wrightRook);
-        allPieces.add(new King(4, 0, Player.players[0], _wleftRook, _wrightRook));
+        allPieces.add(new King(3, 0, Player.players[0], _wleftRook, _wrightRook));
         allPieces.add(new Knight(1, 0, Player.players[0]));
         allPieces.add(new Knight(6, 0, Player.players[0]));
         allPieces.add(new Bishop(5, 0, Player.players[0]));
         allPieces.add(new Bishop(2, 0, Player.players[0]));
-        //for(int i = 0; i < NUM_ROWS; i++)
-            //allPieces.add(new Pawn(i, 1, Player.players[0]));
+        for(int i = 0; i < NUM_ROWS; i++)
+            allPieces.add(new Pawn(i, 1, Player.players[0]));
         
         //player2's pieces (black)
         allPieces.add(new Queen(4, NUM_ROWS - 1, Player.players[1]));
@@ -79,8 +84,8 @@ public class Board {
         allPieces.add(new Knight(6, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(5, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(2, NUM_ROWS - 1, Player.players[1]));
-        //for(int i = 0; i < NUM_ROWS; i++)
-            //allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
+        for(int i = 0; i < NUM_ROWS; i++)
+            allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
         
         UpdateBoard();
         first = true;
@@ -88,6 +93,7 @@ public class Board {
         winner = WinState.NO_WIN;
         selectedPiece = null;
         removePiece = null;
+        inCheck = null;
     }
     public static void RandomizeBackRow() {
         
@@ -182,25 +188,32 @@ public class Board {
     public static void PickPiece(int x, int y){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
-        clip.drain();
+        clip.drain();//this makes sure that the sound is done playing before the next move
         //System.out.println(x + ", " + y);
         for(Piece pec : allPieces){
             if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                 if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
-                    if(selectedPiece != null)
-                        if(!selectedPiece.moving){
-                            selectedPiece = pec;
-                            selectedPiece.emptySpots.clear();
-                            selectedPiece.fullSpots.clear();
+                    selectedPiece = pec;
+                    if(inCheck != null){
+                        if((selectedPiece.myPlayer.GetPlayerNumber().equals(1) && inCheck.equals(CheckState.P1_CHECK)) || 
+                            (selectedPiece.myPlayer.GetPlayerNumber().equals(2) && inCheck.equals(CheckState.P2_CHECK))){//this makes sure only the effected player can move thier king
+                            //might want to remove this if statement below because say if you want to move a differnt piece to save your king you wont be able to
+                            if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
+                                selectedPiece = null;
+                                return;
+                            }
                             selectedPiece.SetPossibleMoves(xdelta, ydelta);
                             if(selectedPiece.takenPiece != null)
                                 selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                        }
+                        else{
+                            selectedPiece.SetPossibleMoves(xdelta, ydelta);
+                            if(selectedPiece.takenPiece != null)
+                                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                        }
                     }
-                    if(selectedPiece == null){
-                        selectedPiece = pec;
-                        selectedPiece.emptySpots.clear();
-                        selectedPiece.fullSpots.clear();
+                    else if(inCheck == null){
                         selectedPiece.SetPossibleMoves(xdelta, ydelta);
                         if(selectedPiece.takenPiece != null)
                             selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
@@ -225,13 +238,10 @@ public class Board {
                             Queen Q = new Queen(_x, _y, play);
                             allPieces.add(Q);
                             board[_x][_y] = Q;
-                            //Player.SwitchTurn();
                             return;
                         }
                     }
                     selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
-                    //selectedPiece.xPos = space.xPos;
-                    //selectedPiece.yPos = space.yPos;
                     selectedPiece.firstUniqueMove = false;
                     selectedPiece.takenPiece = null;
                     Chess.randomize.disable();
@@ -242,7 +252,6 @@ public class Board {
                         space.rook.yPos = space.rookYPos;
                         board[space.rook.xPos][space.rook.yPos] = space.rook;
                     }
-                    //Player.SwitchTurn();
                     return;
                 }
             }
@@ -264,16 +273,11 @@ public class Board {
                             Queen Q = new Queen(_x, _y, play);
                             allPieces.add(Q);
                             board[_x][_y] = Q;
-                            //Player.SwitchTurn();
                             return;
                         }
                     }
                     selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
-                    //selectedPiece.xPos = space.xPos;
-                    //selectedPiece.yPos = space.yPos;
-                    //Player.SwitchTurn();
                     return;
-                    //UpdateBoard();
                 }
             }
         }
@@ -336,7 +340,9 @@ public class Board {
         return(piecToReturn);
     }
     //play the audio and reset the selected piece
-    public static void EndMovement(int i ){
+    public static void EndMovement(int i){
+        int xdelta = Window.getWidth2() / NUM_COLUMNS;
+        int ydelta = Window.getHeight2() / NUM_ROWS;
         if(first){
             first = false;
             clip.start();
@@ -344,13 +350,58 @@ public class Board {
         else
             clip.loop(i);
         selectedPiece.moving = false;
-        selectedPiece.emptySpots.clear();
-        selectedPiece.fullSpots.clear();
         if(removePiece != null)
             RemovePiece(removePiece);
-        removePiece = null;
-        selectedPiece = null;
-        Player.SwitchTurn();
+        CheckIfInCheck(xdelta, ydelta);
+        if(selectedPiece != null){
+            selectedPiece.emptySpots.clear();
+            selectedPiece.fullSpots.clear();
+            removePiece = null;
+            selectedPiece = null;
+            Player.SwitchTurn();
+        }
+    }
+    public static void CheckIfInCheck(int xdelta, int ydelta){
+        for(Piece piece : allPieces){
+            piece.SetPossibleMoves(xdelta, ydelta);
+            for(FullSpace space : piece.fullSpots){
+                if(board[space.xPos][space.yPos] instanceof King && board[space.xPos][space.yPos].myPlayer != Player.GetCurrentPlayer()){
+                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(2) ? CheckState.P1_CHECK : CheckState.P2_CHECK;
+                    selectedPiece.emptySpots.clear();
+                    selectedPiece.fullSpots.clear();
+                    removePiece = null;
+                    selectedPiece = null;
+                    Player.SwitchTurn();
+                    return;
+                }
+                else
+                    inCheck = null;
+                if(inCheck != null){
+                    if(inCheck.equals(CheckState.P1_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(2) ||
+                       inCheck.equals(CheckState.P2_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(1)){
+                        selectedPiece.emptySpots.clear();
+                        selectedPiece.fullSpots.clear();
+                        removePiece = null;
+                        selectedPiece = null;
+                        Player.SwitchTurn();
+                        return;
+                    }
+                    else
+                        inCheck = null;
+                }
+                else if((board[space.xPos][space.yPos] instanceof King && board[space.xPos][space.yPos].myPlayer == Player.GetCurrentPlayer())){
+                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(1) ? CheckState.P1_CHECK : CheckState.P2_CHECK;
+                    selectedPiece.emptySpots.clear();
+                    selectedPiece.fullSpots.clear();
+                    removePiece = null;
+                    selectedPiece = null;
+                    Player.SwitchTurn();
+                    return;
+                }
+                else
+                    inCheck = null;
+            }
+        }
     }
     //return a piece based on x,y MOUSE coords
     public static Piece GetPieceMouse(int x,int y){
@@ -405,15 +456,39 @@ public class Board {
         if(activePiece && selectedPiece.myPlayer == Player.GetCurrentPlayer() && !selectedPiece.moving)
             selectedPiece.DrawPossibleMoves(g,xdelta,ydelta);
     //draw the pieces
-        for(Piece pec : allPieces){
-            if(pec != selectedPiece)
-                g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
-            else if(!selectedPiece.moving)
-                g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+        counter++;
+        if(counter % 2 == 0)// this prevents the concurrent modification error that happens at start somtimes
+            pieceSize1 = allPieces.size();
+        else if(counter % 2 == 1)
+            pieceSize2 = allPieces.size();
+        if(pieceSize1 == pieceSize2){
+            for(Piece pec : allPieces){
+                if(pec != selectedPiece)
+                    g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+                else if(!selectedPiece.moving)
+                    g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+            }
         }
     //Run the animation method
         if(activePiece && selectedPiece.moving)
             selectedPiece.Move(xdelta, ydelta, g);
+    //Display in check or not
+        if(inCheck != null){
+            if (inCheck.equals(CheckState.P1_CHECK)) {
+                g.setColor(Color.black);
+                g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210, 40);
+                g.setColor(Color.white);
+                g.setFont(new Font("Arial",Font.PLAIN,25));
+                g.drawString("Player 1 in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);                
+            }
+            else if (inCheck.equals(CheckState.P2_CHECK)) {
+                g.setColor(Color.white);
+                g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210, 40);
+                g.setColor(Color.black);
+                g.setFont(new Font("Arial",Font.PLAIN,25));
+                g.drawString("Player 2 in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);                
+            }
+        }
     //Display if a player has won.
         if (winner == WinState.WIN_P1) {
             g.setColor(Color.black);

@@ -36,6 +36,7 @@ public class Pawn extends Piece{
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
+        fullSpots.clear();
         
         //black direction
         if(myPlayer.getColor().equals(Color.black)){

@@ -62,7 +62,7 @@ public class King extends Piece{
         
         //going clockwise around the king to check open spots
         if(xPos - 1 < Board.BOARD_SIZE && yPos - 1 < Board.BOARD_SIZE && xPos - 1 >= 0 && yPos - 1 >= 0){
-            if(Board.CheckifOpenSpot(xPos - 1, yPos - 1)){        
+            if(Board.CheckifOpenSpot(xPos - 1, yPos - 1)){
                 emptySpots.add(new EmptySpace(xPos - 1, yPos - 1));
             }
             else if(!Board.CheckifOpenSpot(xPos - 1, yPos - 1) && Board.GetPieceBoard(xPos - 1, yPos - 1).myPlayer != myPlayer){

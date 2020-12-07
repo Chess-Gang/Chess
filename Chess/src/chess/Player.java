@@ -15,17 +15,19 @@ public class Player {
     
     private static Player currentTurn;
     public static Player players[] = new Player[2];
-    private Color color;    
+    private Color color;   
+    private int playerNum;
     
     
-    Player(Color _color)
+    Player(Color _color, int num)
     {
         color = _color;
+        playerNum = num;
     }
     public static void Reset()
     {
-        players[0] = new Player(Color.white);//player 1
-        players[1] = new Player(Color.black);//player 2
+        players[0] = new Player(Color.white, 1);//player 1
+        players[1] = new Player(Color.black, 2);//player 2
         currentTurn = players[0];
     }
     public static Player GetCurrentPlayer()
@@ -42,5 +44,9 @@ public class Player {
     public Color getColor()
     {
         return (color);
+    }
+    public Integer GetPlayerNumber()
+    {
+        return (playerNum);
     }
 }

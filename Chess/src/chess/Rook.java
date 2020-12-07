@@ -32,6 +32,7 @@ public class Rook extends Piece{
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
+        fullSpots.clear();
         boolean stopCheck = false;
         
         for(int i = yPos - 1; i >= 0 && !stopCheck; i--){//vertical UP

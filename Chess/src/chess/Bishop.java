@@ -36,6 +36,7 @@ public class Bishop extends Piece{
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
+        fullSpots.clear();
         boolean stopCheck = false;
         int z = 0;
         
