@@ -15,10 +15,12 @@ public class Player {
     //Players
     private static Player currentTurn;
     public static Player players[] = new Player[4];
-    static int turnTracker = 0;
+    public static int turnTracker = 0;
+    public static boolean PlayerInCheck = false;
     
     //Player Info  
     private int playerNum;
+    public boolean inCheck = false;
     
     
     Player( int num)
@@ -33,6 +35,7 @@ public class Player {
         players[3] = new Player(3);//player 2 yell
         currentTurn = players[0];
         turnTracker = 0;
+        PlayerInCheck = false;
     }
     public static Player GetCurrentPlayer()
     {
@@ -51,6 +54,11 @@ public class Player {
             if(turnTracker == 4)
                 turnTracker = 0;
             currentTurn = players[turnTracker];
+        }
+        PlayerInCheck = false;
+        for(int i = 0; i < players.length; i++){
+            if(players[i].inCheck)
+                PlayerInCheck = true;
         }
     }
     public Integer GetPlayerNumber()

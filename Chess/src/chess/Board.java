@@ -1,5 +1,6 @@
 package chess;
 
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.image.ImageObserver;
@@ -18,10 +19,10 @@ public class Board{
     private static ArrayList<Piece> allPieces = new ArrayList <Piece>();//keeps track of the pieces regardless of posistion
     
     //Enums
-    private enum WinState {NO_WIN,WIN_P1,WIN_P2,TIE};
+    private enum WinState {NO_WIN,TIE,WIN_P1,WIN_P2,WIN_P3,WIN_P4};
     private static WinState winner;
-    private static enum CheckState {P1_CHECK, P2_CHECK};
-    private static CheckState inCheck;//determines if a king is in check and which one
+    //private static enum CheckState {P1_CHECK, P2_CHECK, P3_CHECK, P4_CHECK};
+    //private static CheckState inCheck;//determines if a king is in check and which one
     
     //Audio
     private static Clip clip;//the chess sound
@@ -45,7 +46,7 @@ public class Board{
     static int allPiecesSize1;
     static int allPiecesSize2;
     
-    public static void Reset() {
+    public static void NormalReset() {
         board = new Piece[NUM_ROWS][NUM_COLUMNS];
         try {
 	AudioInputStream input = AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
@@ -102,7 +103,6 @@ public class Board{
         winner = WinState.NO_WIN;
         selectedPiece = null;
         removePiece = null;
-        inCheck = null;
     }
     public static void P4Reset() {
         board = new Piece[NUM_ROWS][NUM_COLUMNS];
@@ -190,7 +190,6 @@ public class Board{
         winner = Board.WinState.NO_WIN;
         selectedPiece = null;
         removePiece = null;
-        inCheck = null;
     }
     
     public static void RandomizeBackRow() {
@@ -291,25 +290,16 @@ public class Board{
                Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                 if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
                     selectedPiece = pec;
-                    if(inCheck != null){
-                        if((selectedPiece.myPlayer.GetPlayerNumber().equals(0) && inCheck.equals(CheckState.P1_CHECK)) || 
-                            (selectedPiece.myPlayer.GetPlayerNumber().equals(1) && inCheck.equals(CheckState.P2_CHECK))){//this makes sure only the effected player can move thier king
-                            //might want to remove this if statement below because say if you want to move a differnt piece to save your king you wont be able to
-                            if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
-                                selectedPiece = null;
-                                return;
-                            }
-                            selectedPiece.SetPossibleMoves(xdelta, ydelta);
-                            if(selectedPiece.takenPiece != null)
-                                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                    if(Player.GetCurrentPlayer().inCheck){//might want to remove this, because if you want to move a differnt piece to save your king you wont be able to
+                        if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
+                            selectedPiece = null;
+                            return;
                         }
-                        else{
-                            selectedPiece.SetPossibleMoves(xdelta, ydelta);
-                            if(selectedPiece.takenPiece != null)
-                                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
-                        }
+                        selectedPiece.SetPossibleMoves(xdelta, ydelta);
+                        if(selectedPiece.takenPiece != null)
+                            selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece); 
                     }
-                    else if(inCheck == null){
+                    else{
                         selectedPiece.SetPossibleMoves(xdelta, ydelta);
                         if(selectedPiece.takenPiece != null)
                             selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
@@ -433,54 +423,23 @@ public class Board{
                 board[_x][_y] = Q;
             }
         }
-        //CheckIfInCheck(xdelta, ydelta);
-        if(selectedPiece != null){
-            selectedPiece.emptySpots.clear();
-            selectedPiece.fullSpots.clear();
-            removePiece = null;
-            selectedPiece = null;
-            Player.SwitchTurn();
-        }
+        CheckIfInCheck(xdelta, ydelta);
+        selectedPiece.emptySpots.clear();
+        selectedPiece.fullSpots.clear();
+        removePiece = null;
+        selectedPiece = null;
+        Player.SwitchTurn();
     }
+    //Checks to see if a king is in check
     public static void CheckIfInCheck(int xdelta, int ydelta){
+        for(Player play : Player.players)
+            play.inCheck = false;
         for(Piece piece : allPieces){
             piece.SetPossibleMoves(xdelta, ydelta);
             for(FullSpace space : piece.fullSpots){
-                if(board[space.xPos][space.yPos] instanceof King && board[space.xPos][space.yPos].myPlayer != Player.GetCurrentPlayer()){
-                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(0) ? CheckState.P1_CHECK : CheckState.P2_CHECK;//this loop covers all non-king piece to see if they can potentially take a king
-                    selectedPiece.emptySpots.clear();
-                    selectedPiece.fullSpots.clear();
-                    removePiece = null;
-                    selectedPiece = null;
-                    Player.SwitchTurn();
-                    return;
+                if(board[space.xPos][space.yPos] instanceof King){
+                    board[space.xPos][space.yPos].myPlayer.inCheck = true;
                 }
-                else
-                    inCheck = null;
-                if(inCheck != null){
-                    if(inCheck.equals(CheckState.P1_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(1) ||
-                       inCheck.equals(CheckState.P2_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(0)){
-                        selectedPiece.emptySpots.clear();
-                        selectedPiece.fullSpots.clear();
-                        removePiece = null;
-                        selectedPiece = null;
-                        Player.SwitchTurn();
-                        return;
-                    }
-                    else
-                        inCheck = null;
-                }
-                else if((board[space.xPos][space.yPos] instanceof King && board[space.xPos][space.yPos].myPlayer == Player.GetCurrentPlayer())){
-                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(0) ? CheckState.P1_CHECK : CheckState.P2_CHECK;
-                    selectedPiece.emptySpots.clear();
-                    selectedPiece.fullSpots.clear();
-                    removePiece = null;
-                    selectedPiece = null;
-                    Player.SwitchTurn();
-                    return;
-                }
-                else
-                    inCheck = null;
             }
         }
     }
@@ -554,21 +513,20 @@ public class Board{
         if(activePiece && selectedPiece.moving)
             selectedPiece.Move(xdelta, ydelta, g);
     //Display in check or not
-        if(inCheck != null){
-            if (inCheck.equals(CheckState.P1_CHECK)) {
-                g.setColor(Color.black);
-                g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210, 40);
-                g.setColor(Color.white);
-                g.setFont(new Font("Arial",Font.PLAIN,25));
-                g.drawString("Player 1 in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);                
+        if(Player.PlayerInCheck){
+            String checkString = "";
+            int playersInCheck = 0;
+            for(Player play : Player.players){
+                if (play.inCheck) {
+                    g.setFont(new Font("Arial",Font.PLAIN,25));
+                    checkString += "|" + (play.GetPlayerNumber() + 1) + "| ";
+                    playersInCheck++;
+                }
             }
-            else if (inCheck.equals(CheckState.P2_CHECK)) {
-                g.setColor(Color.white);
-                g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210, 40);
-                g.setColor(Color.black);
-                g.setFont(new Font("Arial",Font.PLAIN,25));
-                g.drawString("Player 2 in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);                
-            }
+            g.setColor(Color.black);
+            g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210 + playersInCheck*32, 40);
+            g.setColor(Color.white);
+            g.drawString("Player " + checkString + " in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);  
         }
     //Display if a player has won.
         if (winner == WinState.WIN_P1) {

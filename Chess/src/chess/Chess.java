@@ -58,7 +58,7 @@ public class Chess extends JFrame implements Runnable {
             Board.NUM_COLUMNS = 8;
             normalMode = true;
             //currentBoard = new Board();
-            Board.Reset();
+            Board.NormalReset();
             P4ModeBut.disable();
         });
         P4ModeBut.addActionListener((ActionEvent e) -> {
@@ -214,7 +214,7 @@ public class Chess extends JFrame implements Runnable {
         Player.Reset();
         if(Chess.normalMode){
             Board.BOARD_SIZE = 8;
-            Board.Reset();
+            Board.NormalReset();
         }
         else if(Chess.P4Mode){
             Board.BOARD_SIZE = 12;
