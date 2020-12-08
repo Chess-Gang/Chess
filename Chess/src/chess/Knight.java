@@ -25,7 +25,7 @@ public class Knight extends Piece{
     Knight(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.KNIGHT;
-        if(myPlayer.getColor().equals(Color.white))
+        if(myPlayer.GetPlayerNumber().equals(0))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_knight_1x.png");
         else
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_knight_1x.png");

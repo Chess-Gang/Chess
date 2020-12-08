@@ -1,45 +1,55 @@
 package chess;
 
-import static chess.Piece.observe;
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sound.sampled.*;
 
-public class Board {
-    public final static int BOARD_SIZE = 8;//12 for 4 player
-    private final static int NUM_ROWS = BOARD_SIZE;
-    private final static int NUM_COLUMNS = BOARD_SIZE;
-    private static Piece board[][] = new Piece[NUM_ROWS][NUM_COLUMNS];
-    private static ArrayList<Piece> allPieces = new ArrayList <Piece>();
+public class Board{
+    //Board Size
+    public static int BOARD_SIZE;
+    public static int NUM_ROWS = BOARD_SIZE;
+    public static int NUM_COLUMNS = BOARD_SIZE;
+    
+    //Arrays
+    private static Piece board[][];//keep track of pieces on the board
+    private static ArrayList<Piece> allPieces = new ArrayList <Piece>();//keeps track of the pieces regardless of posistion
+    
+    //Enums
     private enum WinState {NO_WIN,WIN_P1,WIN_P2,TIE};
     private static WinState winner;
-    private static Image curBoardSquare1;//current sqaures on display
-    private static Image curBoardSquare2;
-    private static Image backroundSquares[] = new Image[4];//1-2 brown, 3-4 black
+    private static enum CheckState {P1_CHECK, P2_CHECK};
+    private static CheckState inCheck;//determines if a king is in check and which one
+    
+    //Audio
+    private static Clip clip;//the chess sound
+    
+    //Backround Info
     public static enum BackroundType{BROWN, BLACK};
     private static BackroundType backType;
-    private static ImageObserver observe;
-    private static Piece selectedPiece;
-    private static Piece removePiece;
-    private static Clip clip;
-    public static boolean first;
-    public static boolean randomized;
-    private static enum CheckState {P1_CHECK, P2_CHECK};
-    private static CheckState inCheck;
-    static Graphics2D graphic;
-    static int counter;
-    static int pieceSize1;
-    static int pieceSize2;
+    private static Image backroundSquares[] = new Image[4];//1-2 brown, 3-4 black
+    private static Image curBoardSquare1;//current sqaures on display
+    private static Image curBoardSquare2;
     
-    public static void Reset() {//fix double playing sound at first move
+    //Piece Instances / Info
+    private static Piece selectedPiece;//curently selected piece
+    private static Piece removePiece;// instance of the piece to remove
+    public static boolean first;//after the first move this is false
+    
+    //Graphics
+    private static ImageObserver observe;
+    static Graphics2D graphic;
+    static int counter;//these ints prevent a concurrent modification error that somtime happened at start
+    static int allPiecesSize1;
+    static int allPiecesSize2;
+    
+    public static void Reset() {
+        board = new Piece[NUM_ROWS][NUM_COLUMNS];
         try {
 	AudioInputStream input = AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
-	clip=AudioSystem.getClip();
+	clip = AudioSystem.getClip();
 	clip.open(input);
         } catch (UnsupportedAudioFileException e) {
                 e.printStackTrace();
@@ -89,15 +99,101 @@ public class Board {
         
         UpdateBoard();
         first = true;
-        randomized = false;
         winner = WinState.NO_WIN;
         selectedPiece = null;
         removePiece = null;
         inCheck = null;
     }
-    public static void RandomizeBackRow() {
+    public static void P4Reset() {
+        board = new Piece[NUM_ROWS][NUM_COLUMNS];
+        try {
+	AudioInputStream input = AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));//sound not getting set 12-7
+	clip = AudioSystem.getClip();
+	clip.open(input);
+        } catch (UnsupportedAudioFileException e) {
+                e.printStackTrace();
+        } catch (IOException e) {
+                e.printStackTrace();
+        } catch (LineUnavailableException e) {
+                e.printStackTrace();
+        }
+        backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
+        backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
+        backroundSquares[3] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
+        backroundSquares[2] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray light _1x.png");
+        if(backType == null)
+            SwitchBoardColor(Board.BackroundType.BROWN);
+        allPieces.clear();
+        for (int zrow=0;zrow<NUM_ROWS;zrow++)
+            for (int zcol=0;zcol<NUM_COLUMNS;zcol++)
+                board[zrow][zcol] = null; 
         
-        randomized = true;
+        //player0's pieces (white)
+        allPieces.add(new Queen(6, 0, Player.players[0]));
+        Rook _0leftRook = new Rook(2, 0, Player.players[0]);
+        allPieces.add(_0leftRook);
+        Rook _0rightRook = new Rook(9, 0, Player.players[0]);
+        allPieces.add(_0rightRook);
+        allPieces.add(new King(5, 0, Player.players[0], _0leftRook, _0rightRook));
+        allPieces.add(new Knight(3, 0, Player.players[0]));
+        allPieces.add(new Knight(8, 0, Player.players[0]));
+        allPieces.add(new Bishop(7, 0, Player.players[0]));
+        allPieces.add(new Bishop(4, 0, Player.players[0]));
+        for(int i = 0; i < 8; i++)
+            allPieces.add(new Pawn(i + 2, 1, Player.players[0]));
+        
+        //player1's pieces (black)
+        allPieces.add(new Queen(6, NUM_ROWS - 1, Player.players[1]));
+        Rook _1leftRook = new Rook(2, NUM_ROWS - 1, Player.players[1]);
+        allPieces.add(_1leftRook);
+        Rook _1rightRook = new Rook(9, NUM_ROWS - 1, Player.players[1]);
+        allPieces.add(_1rightRook);
+        allPieces.add(new King(5, NUM_ROWS - 1, Player.players[1], _1leftRook, _1rightRook));
+        allPieces.add(new Knight(3, NUM_ROWS - 1, Player.players[1]));
+        allPieces.add(new Knight(8, NUM_ROWS - 1, Player.players[1]));
+        allPieces.add(new Bishop(7, NUM_ROWS - 1, Player.players[1]));
+        allPieces.add(new Bishop(4, NUM_ROWS - 1, Player.players[1]));
+        for(int i = 0; i < 8; i++)
+            allPieces.add(new Pawn(i + 2, NUM_ROWS - 2, Player.players[1]));
+        
+        //player2's pieces (black)
+        allPieces.add(new Queen(0, 6, Player.players[2]));
+        Rook _2leftRook = new Rook(0, 2, Player.players[2]);
+        allPieces.add(_2leftRook);
+        Rook _2rightRook = new Rook(0, 9, Player.players[2]);
+        allPieces.add(_2rightRook);
+        allPieces.add(new King(0, 5, Player.players[2], _2leftRook, _2rightRook));
+        allPieces.add(new Knight(0, 3, Player.players[2]));
+        allPieces.add(new Knight(0, 8, Player.players[2]));
+        allPieces.add(new Bishop(0, 7, Player.players[2]));
+        allPieces.add(new Bishop(0, 4, Player.players[2]));
+        for(int i = 0; i < 8; i++)
+            allPieces.add(new Pawn(1, i + 2, Player.players[2]));
+        
+        //player3's pieces (black)
+        allPieces.add(new Queen(NUM_COLUMNS - 1, 6, Player.players[3]));
+        Rook _3leftRook = new Rook(NUM_COLUMNS - 1, 2, Player.players[3]);
+        allPieces.add(_3leftRook);
+        Rook _3rightRook = new Rook(NUM_COLUMNS - 1, 9, Player.players[3]);
+        allPieces.add(_3rightRook);
+        allPieces.add(new King(NUM_COLUMNS - 1, 5, Player.players[3], _3leftRook, _3rightRook));
+        allPieces.add(new Knight(NUM_COLUMNS - 1, 3, Player.players[3]));
+        allPieces.add(new Knight(NUM_COLUMNS - 1, 8, Player.players[3]));
+        allPieces.add(new Bishop(NUM_COLUMNS - 1, 7, Player.players[3]));
+        allPieces.add(new Bishop(NUM_COLUMNS - 1, 4, Player.players[3]));
+        for(int i = 0; i < 8; i++)
+            allPieces.add(new Pawn(NUM_COLUMNS - 2, i + 2, Player.players[3]));
+        
+        UpdateBoard();
+        Chess.randomize.disable();
+        first = true;
+        winner = Board.WinState.NO_WIN;
+        selectedPiece = null;
+        removePiece = null;
+        inCheck = null;
+    }
+    
+    public static void RandomizeBackRow() {
         allPieces.clear();
         for (int zrow=0;zrow<NUM_ROWS;zrow++)
             for (int zcol=0;zcol<NUM_COLUMNS;zcol++)
@@ -196,8 +292,8 @@ public class Board {
                 if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
                     selectedPiece = pec;
                     if(inCheck != null){
-                        if((selectedPiece.myPlayer.GetPlayerNumber().equals(1) && inCheck.equals(CheckState.P1_CHECK)) || 
-                            (selectedPiece.myPlayer.GetPlayerNumber().equals(2) && inCheck.equals(CheckState.P2_CHECK))){//this makes sure only the effected player can move thier king
+                        if((selectedPiece.myPlayer.GetPlayerNumber().equals(0) && inCheck.equals(CheckState.P1_CHECK)) || 
+                            (selectedPiece.myPlayer.GetPlayerNumber().equals(1) && inCheck.equals(CheckState.P2_CHECK))){//this makes sure only the effected player can move thier king
                             //might want to remove this if statement below because say if you want to move a differnt piece to save your king you wont be able to
                             if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
                                 selectedPiece = null;
@@ -227,20 +323,6 @@ public class Board {
                    Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
                     board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
                     board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
-                    if(selectedPiece instanceof Pawn){//if a pawn gets to the end a queen is made
-                        Pawn pawn = (Pawn)selectedPiece;
-                        if(pawn.MakeQueen()){
-                            int _x = selectedPiece.xPos;
-                            int _y = selectedPiece.yPos;
-                            Player play = selectedPiece.myPlayer;
-                            RemovePiece(selectedPiece);
-                            RemovePiece(pawn);
-                            Queen Q = new Queen(_x, _y, play);
-                            allPieces.add(Q);
-                            board[_x][_y] = Q;
-                            return;
-                        }
-                    }
                     selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
                     selectedPiece.firstUniqueMove = false;
                     selectedPiece.takenPiece = null;
@@ -262,20 +344,6 @@ public class Board {
                     removePiece = GetPieceMouse(x, y);
                     board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
                     board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
-                    if(selectedPiece instanceof Pawn){
-                        Pawn pawn = (Pawn)selectedPiece;
-                        if(pawn.MakeQueen()){//if a pawn gets to the end a queen is made
-                            int _x = selectedPiece.xPos;
-                            int _y = selectedPiece.yPos;
-                            Player play = selectedPiece.myPlayer;
-                            RemovePiece(selectedPiece);
-                            RemovePiece(pawn);
-                            Queen Q = new Queen(_x, _y, play);
-                            allPieces.add(Q);
-                            board[_x][_y] = Q;
-                            return;
-                        }
-                    }
                     selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
                     return;
                 }
@@ -310,9 +378,9 @@ public class Board {
         for(Piece pec : allPieces){
             if(pec.xPos == x && pec.yPos == y){
                 piecToRemove = pec;
-                if(pec instanceof King && pec.myPlayer.getColor().equals(Color.black))//Gives win to player1
+                if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1))//Gives win to player1
                     winner = WinState.WIN_P1;
-                else if(pec instanceof King && pec.myPlayer.getColor().equals(Color.white))//gives win to player2
+                else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0))//gives win to player2
                     winner = WinState.WIN_P2;
             }
         }
@@ -321,9 +389,9 @@ public class Board {
     }
     //Remove a piece based off an instance also decided if game has been won
     public static void RemovePiece(Piece pec){
-        if(pec instanceof King && pec.myPlayer.getColor().equals(Color.black))//Gives win to player1
+        if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1))//Gives win to player1
             winner = WinState.WIN_P1;
-        else if(pec instanceof King && pec.myPlayer.getColor().equals(Color.white))//gives win to player2
+        else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0))//gives win to player2
             winner = WinState.WIN_P2;
         allPieces.remove(pec);
     }
@@ -352,7 +420,20 @@ public class Board {
         selectedPiece.moving = false;
         if(removePiece != null)
             RemovePiece(removePiece);
-        CheckIfInCheck(xdelta, ydelta);
+        if(selectedPiece instanceof Pawn){//if a pawn gets to the end a queen is made
+            Pawn pawn = (Pawn)selectedPiece;
+            if(pawn.MakeQueen()){
+                int _x = selectedPiece.xPos;
+                int _y = selectedPiece.yPos;
+                Player play = selectedPiece.myPlayer;
+                RemovePiece(selectedPiece);
+                RemovePiece(pawn);
+                Queen Q = new Queen(_x, _y, play);
+                allPieces.add(Q);
+                board[_x][_y] = Q;
+            }
+        }
+        //CheckIfInCheck(xdelta, ydelta);
         if(selectedPiece != null){
             selectedPiece.emptySpots.clear();
             selectedPiece.fullSpots.clear();
@@ -366,7 +447,7 @@ public class Board {
             piece.SetPossibleMoves(xdelta, ydelta);
             for(FullSpace space : piece.fullSpots){
                 if(board[space.xPos][space.yPos] instanceof King && board[space.xPos][space.yPos].myPlayer != Player.GetCurrentPlayer()){
-                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(2) ? CheckState.P1_CHECK : CheckState.P2_CHECK;
+                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(0) ? CheckState.P1_CHECK : CheckState.P2_CHECK;//this loop covers all non-king piece to see if they can potentially take a king
                     selectedPiece.emptySpots.clear();
                     selectedPiece.fullSpots.clear();
                     removePiece = null;
@@ -377,8 +458,8 @@ public class Board {
                 else
                     inCheck = null;
                 if(inCheck != null){
-                    if(inCheck.equals(CheckState.P1_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(2) ||
-                       inCheck.equals(CheckState.P2_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(1)){
+                    if(inCheck.equals(CheckState.P1_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(1) ||
+                       inCheck.equals(CheckState.P2_CHECK) && Player.GetCurrentPlayer().GetPlayerNumber().equals(0)){
                         selectedPiece.emptySpots.clear();
                         selectedPiece.fullSpots.clear();
                         removePiece = null;
@@ -390,7 +471,7 @@ public class Board {
                         inCheck = null;
                 }
                 else if((board[space.xPos][space.yPos] instanceof King && board[space.xPos][space.yPos].myPlayer == Player.GetCurrentPlayer())){
-                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(1) ? CheckState.P1_CHECK : CheckState.P2_CHECK;
+                    inCheck = selectedPiece.myPlayer.GetPlayerNumber().equals(0) ? CheckState.P1_CHECK : CheckState.P2_CHECK;
                     selectedPiece.emptySpots.clear();
                     selectedPiece.fullSpots.clear();
                     removePiece = null;
@@ -458,10 +539,10 @@ public class Board {
     //draw the pieces
         counter++;
         if(counter % 2 == 0)// this prevents the concurrent modification error that happens at start somtimes
-            pieceSize1 = allPieces.size();
+            allPiecesSize1 = allPieces.size();
         else if(counter % 2 == 1)
-            pieceSize2 = allPieces.size();
-        if(pieceSize1 == pieceSize2){
+            allPiecesSize2 = allPieces.size();
+        if(allPiecesSize1 == allPiecesSize2){
             for(Piece pec : allPieces){
                 if(pec != selectedPiece)
                     g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);

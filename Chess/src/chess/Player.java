@@ -12,23 +12,27 @@ import java.awt.Color;
  * @author Conner
  */
 public class Player {
-    
+    //Players
     private static Player currentTurn;
-    public static Player players[] = new Player[2];
-    private Color color;   
+    public static Player players[] = new Player[4];
+    static int turnTracker = 0;
+    
+    //Player Info  
     private int playerNum;
     
     
-    Player(Color _color, int num)
+    Player( int num)
     {
-        color = _color;
         playerNum = num;
     }
     public static void Reset()
     {
-        players[0] = new Player(Color.white, 1);//player 1
-        players[1] = new Player(Color.black, 2);//player 2
+        players[0] = new Player(0);//player 1 white / red 
+        players[1] = new Player(1);//player 2 black /blue
+        players[2] = new Player(2);//player 1 green
+        players[3] = new Player(3);//player 2 yell
         currentTurn = players[0];
+        turnTracker = 0;
     }
     public static Player GetCurrentPlayer()
     {
@@ -36,14 +40,18 @@ public class Player {
     }
     public static void SwitchTurn()
     {
-        if (currentTurn == players[0])
-            currentTurn = players[1];
-        else
-            currentTurn = players[0];
-    }
-    public Color getColor()
-    {
-        return (color);
+        if(Chess.normalMode){
+            if (currentTurn == players[0])
+                currentTurn = players[1];
+            else
+                currentTurn = players[0];
+        }
+        else if(Chess.P4Mode){
+            turnTracker++;
+            if(turnTracker == 4)
+                turnTracker = 0;
+            currentTurn = players[turnTracker];
+        }
     }
     public Integer GetPlayerNumber()
     {
