@@ -31,19 +31,23 @@ public class Board {
     public static boolean first;
     public static boolean randomized;
     static Graphics2D graphic;
+    private static boolean start;
+    //used for the win screen overlay using RBGA values(the 4th value is opacity)
+    private static Color myColor = new Color(86, 87, 89, 50);
     
     public static void Reset() {//fix double playing sound at first move
-        try {
-	AudioInputStream input = AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
-	clip=AudioSystem.getClip();
-	clip.open(input);
-        } catch (UnsupportedAudioFileException e) {
-                e.printStackTrace();
-        } catch (IOException e) {
-                e.printStackTrace();
-        } catch (LineUnavailableException e) {
-                e.printStackTrace();
-        }
+        
+//        try {
+//	AudioInputStream input = AudioSystem.getAudioInputStream(new File("Chess Sound.wav"));
+//	clip=AudioSystem.getClip();
+//	clip.open(input);
+//        } catch (UnsupportedAudioFileException e) {
+//                e.printStackTrace();
+//        } catch (IOException e) {
+//                e.printStackTrace();
+//        } catch (LineUnavailableException e) {
+//                e.printStackTrace();
+//        }
         backroundSquares[1] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown dark_1x.png");
         backroundSquares[0] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square brown light_1x.png");
         backroundSquares[3] = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/square gray dark _1x.png");
@@ -66,8 +70,8 @@ public class Board {
         allPieces.add(new Knight(6, 0, Player.players[0]));
         allPieces.add(new Bishop(5, 0, Player.players[0]));
         allPieces.add(new Bishop(2, 0, Player.players[0]));
-        //for(int i = 0; i < NUM_ROWS; i++)
-            //allPieces.add(new Pawn(i, 1, Player.players[0]));
+        for(int i = 0; i < NUM_ROWS; i++)
+            allPieces.add(new Pawn(i, 1, Player.players[0]));
         
         //player2's pieces (black)
         allPieces.add(new Queen(4, NUM_ROWS - 1, Player.players[1]));
@@ -80,8 +84,8 @@ public class Board {
         allPieces.add(new Knight(6, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(5, NUM_ROWS - 1, Player.players[1]));
         allPieces.add(new Bishop(2, NUM_ROWS - 1, Player.players[1]));
-        //for(int i = 0; i < NUM_ROWS; i++)
-            //allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
+        for(int i = 0; i < NUM_ROWS; i++)
+            allPieces.add(new Pawn(i, NUM_ROWS - 2, Player.players[1]));
         
         UpdateBoard();
         first = true;
@@ -89,6 +93,7 @@ public class Board {
         winner = WinState.NO_WIN;
         selectedPiece = null;
         removePiece = null;
+        start = false;
     }
     public static void RandomizeBackRow() {
         
@@ -183,7 +188,7 @@ public class Board {
     public static void PickPiece(int x, int y){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
-        clip.drain();
+        //clip.drain();
         //System.out.println(x + ", " + y);
         for(Piece pec : allPieces){
             if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
@@ -282,6 +287,7 @@ public class Board {
     
     //changes the board tiles
     public static void SwitchBoardColor(BackroundType type){
+        
         if(type.equals(backType.BROWN)){//changes it to brown
             backType = BackroundType.BLACK;
             curBoardSquare1 = backroundSquares[0];
@@ -292,6 +298,7 @@ public class Board {
             curBoardSquare1 = backroundSquares[2];
             curBoardSquare2 = backroundSquares[3];
         }
+        
     }
     
     //update the board array
@@ -372,9 +379,29 @@ public class Board {
                 return(true);
         return(false);
     }
+    ////////////////////////////////////////////////
     
+    //sets start to true, activates the screen switching
+    public static void start(){
+        start = true;
+    }
+   
+    //paints the first screen
+    public static void firstScreen(Graphics2D g) {
+        if(start == false)
+        g.setColor(Color.GRAY);
+        g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial",Font.PLAIN,50));
+        g.drawString("WELCOME TO CHESS!",75,Window.WINDOW_HEIGHT/2);
+        
+        
+    }
+    
+    /////////////////////////////////////////////////
     //Draw on the board.    
     public static void Draw(Graphics2D g) {
+        if(start){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
         graphic = g;
@@ -415,40 +442,62 @@ public class Board {
     //Run the animation method
         if(activePiece && selectedPiece.moving)
             selectedPiece.Move(xdelta, ydelta, g);
-    //Display if a player has won.
-        if (winner == WinState.WIN_P1) {
-            g.setColor(Color.black);
-            g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
-            g.setColor(Color.white);
-            g.setFont(new Font("Arial",Font.PLAIN,50));
-            g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
-        } else if (winner == WinState.WIN_P2) {
-            g.setColor(Color.white);
-            g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
-            g.setColor(Color.black);
-            g.setFont(new Font("Arial",Font.PLAIN,50));
-            g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
-        } else if (winner == WinState.TIE) {
-            g.setColor(Color.white);
-            g.setFont(new Font("Arial",Font.PLAIN,20));
-            g.drawString("It is a tie",40,65);                
-        }
+        if (null != winner) //Display if a player has won.
+            switch (winner) {
+                case WIN_P1:
+                    g.setColor(myColor);
+                    g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                    g.setColor(Color.black);
+                    g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("Arial",Font.PLAIN,50));
+                    g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);
+                    break;
+                case WIN_P2:
+                    g.setColor(myColor);
+                    g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                    g.setColor(Color.white);
+                    g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                    g.setColor(Color.black);
+                    g.setFont(new Font("Arial",Font.PLAIN,50));
+                    g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);
+                    break;
+                case TIE:
+                    g.setColor(myColor);
+                    g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                    g.setColor(Color.white);
+                    g.setFont(new Font("Arial",Font.PLAIN,20));
+                    g.drawString("It is a tie",40,65);
+                    break;
+                default:
+                    break;
+            }
         
         //adds current player to top
-        if(Player.GetCurrentPlayer() == players[0])
-            g.drawString("White's turn",40,65);
-        else
-            g.drawString("Blacks's turn",40,65);
+        if(Player.GetCurrentPlayer() == players[0]){
+            g.setFont(new Font("Arial",Font.PLAIN,20));
+            g.setColor(Color.white);
+            g.drawString("White's turn",38,65);
+        }
+        else{
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial",Font.PLAIN,20));
+            g.drawString("Blacks's turn",38,65);
+        }
+        }
         
     }
     
     public static void DrawPiece() {
+        if(start){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
+        
         Board.Draw(graphic);
         graphic.setColor(Color.red);
         graphic.fillRect(xdelta, ydelta, 200, 200);
         graphic.drawImage(selectedPiece.pieceImage,Window.getX(xdelta*selectedPiece.xPos),Window.getY(ydelta*selectedPiece.yPos),xdelta + 4,ydelta + 4,observe);
+        }
         //*/
     }
 }

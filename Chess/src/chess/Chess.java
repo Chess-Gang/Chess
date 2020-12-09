@@ -22,41 +22,79 @@ public class Chess extends JFrame implements Runnable {
     static boolean menuUp;
     static Chess frame;
     static JPanel buttonPanel;
+//    static JButton start;
+//    static JButton brown;
+//    static JButton black;
+    static boolean checkStart = false;
     
     public static void main(String[] args) {
         frame = new Chess();
-        
-        //Create button to change board to brown
-        //buttons may cause screen to go white in the build version or in the editor IF THIS HAPPENS just comment out this chunk of code starting here ending at frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
-        //white screen is cause by the window.getwidth2() return the wrong nnumber because the buttons mess with it for some reason?
-        Button brown = new Button("Brown");
-        brown.addActionListener((ActionEvent e) -> {
-            Board.SwitchBoardColor(Board.BackroundType.BROWN);
-            //JOptionPane.showMessageDialog(frame, "You've clicked OK button");
-        });
-        // Create button to change board to black
-        Button black = new Button("Black");
-        black.addActionListener((ActionEvent e) -> {
-            Board.SwitchBoardColor(Board.BackroundType.BLACK);
-            //JOptionPane.showMessageDialog(frame,"You've clicked Cancel button");
-        });
-        randomize.addActionListener((ActionEvent e) -> {
-            Board.RandomizeBackRow();
-            //JOptionPane.showMessageDialog(frame, "You've clicked OK button");
-        });
-        // Add buttons to a panel
-        //black.disable(); .disable()makes the button not be pushable
-        buttonPanel = new JPanel( );
-        buttonPanel.add(brown);
-        buttonPanel.add(black);
-        buttonPanel.add(randomize);
-        frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
-        
+        frame.buttons();
         frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
+    public void buttons(){
+        
+        //Create button to change board to brown
+        //buttons may cause screen to go white in the build version or in the editor IF THIS HAPPENS just comment out this chunk of code starting here ending at frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
+        //white screen is cause by the window.getwidth2() return the wrong nnumber because the buttons mess with it for some reason?
+        
+        //Create button to change board to brown
+        Button brown = new Button("Brown");
+        brown.setVisible(false);
+        brown.addActionListener((ActionEvent e) -> {
+            Board.SwitchBoardColor(Board.BackroundType.BROWN);
+            
+        });
+        // Create button to change board to black
+        Button black = new Button("Black");
+        black.setVisible(false);
+        black.addActionListener((ActionEvent e) -> {
+            Board.SwitchBoardColor(Board.BackroundType.BLACK);
+           
+        });
+        
+        //Create button to randomize back row
+        randomize.setVisible(false);
+        randomize.addActionListener((ActionEvent e) -> {
+            Board.RandomizeBackRow();
+            
+        });
+        
+        //create start button
+        Button start = new Button("Start");
+        start.setVisible(true);
+        start.addActionListener((ActionEvent e) -> {          
+            if(e.getSource()== start){
+                //switches to the screen
+                Board.start();
+                
+                //removes the start button, makes others visible
+                start.setVisible(false);
+                black.setVisible(true);
+                brown.setVisible(true);
+                randomize.setVisible(true);
+                
+                //repaints the panel, switches to the correct buttons
+                buttonPanel.revalidate();
+                buttonPanel.repaint();
+               
+            }
+         });
+        
+        //adds buttons to the panel
+        buttonPanel = new JPanel( );
+        buttonPanel.add(start);
+        buttonPanel.add(brown);
+        buttonPanel.add(black);
+        buttonPanel.add(randomize);
+        frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
+        
+       
+    }
+    ////////////////////////////////////////////////////////////////
     // ignore these methods for now i was thinking of maybe adding in a menu that can be opened and closed but for now just leave them
     public static void MenuChange(){
         menuUp = !menuUp;
@@ -149,7 +187,10 @@ public class Chess extends JFrame implements Runnable {
             gOld.drawImage(image, 0, 0, null);
             return;
         }
+        
+        Board.firstScreen(g);
         Board.Draw(g);
+        
         for (int zi = 0;zi<Board.BOARD_SIZE;zi++)
         {
             g.setColor(Color.white);
@@ -181,6 +222,11 @@ public class Chess extends JFrame implements Runnable {
         Chess.randomize.enable();
         Player.Reset();
         Board.Reset();
+        
+        //when reset the board using buttons();, the randomize button is lost
+        //my guess is because it is a global variable vs a local variable like the other buttons
+        //also, the randomize button is lost, and when clicked reset, the blk & brn buttons do not change
+        //buttons();
     }
 /////////////////////////////////////////////////////////////////////////
     public void animate() {
