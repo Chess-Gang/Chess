@@ -16,23 +16,36 @@ import java.util.ArrayList;
  * @author Conner
  */
 public class Piece {
+    //Posistion
     public int xPos;//these two will be in board square units
-    public int yPos;
-    public int possibleSpotSize = 15;
-    public ArrayList<EmptySpace> emptySpots = new ArrayList<EmptySpace>();
-    public ArrayList<FullSpace> fullSpots = new ArrayList<FullSpace>();
-    public Image pieceImage;
-    public Player myPlayer;
-    public boolean firstUniqueMove = true;
-    public enum pieceType{KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN};
-    public pieceType takenPiece;
-    public pieceType myPieceType;
-    public boolean moving;
-    public int oldX;
+    public int yPos;//unless they are being used animate, in which they will be in normal x , y coords
+    public int oldX;//these will hold the x / y pos Board Units
     public int oldY;
-    int desiredX;
-    int desiredY;
+    public int desiredX;//these are to guide the piece on where to go in the Move method
+    public int desiredY;
+    
+    //Possible Moves Info / storage
+    public int possibleSpotSize = 15; // this is how big the red and blue circles are
+    public ArrayList<EmptySpace> emptySpots = new ArrayList<EmptySpace>();//blue spots
+    public ArrayList<FullSpace> fullSpots = new ArrayList<FullSpace>();//red spots, these apear when you can take a piece
+    
+    //enum
+    public enum pieceType{KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN};
+    public pieceType myPieceType;// this pieces types
+    public pieceType takenPiece;// this is filled with the piece that was taken by this piece too use the taken piece movement as well
+    
+    //Player that this piece belongs to
+    public Player myPlayer;
+    
+    //Move Info
+    public boolean firstUniqueMove = true;//is false after first move
+    public boolean moving;//if the move method is going this is true
+    public int a = 0;//this is a counter to help prevent drifting off course in the move method
+    
+    //Graphics
+    public Image pieceImage;
     static ImageObserver observe;
+    
     Piece(int x, int y, Player play){
         xPos = x;
         yPos =  y;
@@ -379,7 +392,7 @@ public class Piece {
                 break;
             case PAWN:
                     //black direction
-                    if(myPlayer.getColor().equals(Color.black)){
+                    if(myPlayer.GetPlayerNumber().equals(1)){
                         if(Board.CheckifOpenSpot(xPos, yPos - 1)){
                             emptySpots.add(new EmptySpace(xPos, yPos - 1));
                         }
@@ -398,7 +411,7 @@ public class Piece {
                         }
                     }
                     //white direction
-                    if(myPlayer.getColor().equals(Color.white)){
+                    if(myPlayer.GetPlayerNumber().equals(0)){
                         if(Board.CheckifOpenSpot(xPos, yPos + 1)){
                             emptySpots.add(new EmptySpace(xPos, yPos + 1));
                         }

@@ -20,12 +20,11 @@ import java.util.logging.Logger;
 public class King extends Piece{
     Rook leftRook;
     Rook rightRook;
-    int a = 0;
     
     King(int x, int y, Player play, Rook _rook1, Rook _rook2){
         super(x,y,play);
         myPieceType = Piece.pieceType.KING;
-        if(myPlayer.getColor().equals(Color.white))
+        if(myPlayer.GetPlayerNumber().equals(0))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_king_1x.png");
         else
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_king_1x.png");
@@ -38,9 +37,9 @@ public class King extends Piece{
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
         fullSpots.clear();
-        boolean canCastle = true;
+        boolean canCastle = Chess.normalMode;
         //Casteling Checks
-        if(leftRook.firstUniqueMove && firstUniqueMove && !Board.randomized){
+        if(leftRook.firstUniqueMove && firstUniqueMove && Chess.randomize.isEnabled()){
             for(int i =  xPos - 1; i > 0; i--){
                 if(!Board.CheckifOpenSpot(i, yPos))
                     canCastle = false;
@@ -62,7 +61,7 @@ public class King extends Piece{
         
         //going clockwise around the king to check open spots
         if(xPos - 1 < Board.BOARD_SIZE && yPos - 1 < Board.BOARD_SIZE && xPos - 1 >= 0 && yPos - 1 >= 0){
-            if(Board.CheckifOpenSpot(xPos - 1, yPos - 1)){        
+            if(Board.CheckifOpenSpot(xPos - 1, yPos - 1)){
                 emptySpots.add(new EmptySpace(xPos - 1, yPos - 1));
             }
             else if(!Board.CheckifOpenSpot(xPos - 1, yPos - 1) && Board.GetPieceBoard(xPos - 1, yPos - 1).myPlayer != myPlayer){

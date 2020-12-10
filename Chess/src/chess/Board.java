@@ -45,10 +45,11 @@ public class Board{
     static int counter;//these ints prevent a concurrent modification error that somtime happened at start
     static int allPiecesSize1;
     static int allPiecesSize2;
-    
+
     //for the start & end screens
     private static boolean start;
     private static Color myColor = new Color(86, 87, 89, 50);
+
     
     public static void NormalReset() {
         board = new Piece[NUM_ROWS][NUM_COLUMNS];
@@ -145,7 +146,7 @@ public class Board{
         allPieces.add(new Bishop(4, 0, Player.players[0]));
         for(int i = 0; i < 8; i++)
             allPieces.add(new Pawn(i + 2, 1, Player.players[0]));
-        
+
         //player1's pieces (black)
         allPieces.add(new Queen(6, NUM_ROWS - 1, Player.players[1]));
         Rook _1leftRook = new Rook(2, NUM_ROWS - 1, Player.players[1]);
@@ -159,7 +160,7 @@ public class Board{
         allPieces.add(new Bishop(4, NUM_ROWS - 1, Player.players[1]));
         for(int i = 0; i < 8; i++)
             allPieces.add(new Pawn(i + 2, NUM_ROWS - 2, Player.players[1]));
-        
+
         //player2's pieces (black)
         allPieces.add(new Queen(0, 6, Player.players[2]));
         Rook _2leftRook = new Rook(0, 2, Player.players[2]);

@@ -18,11 +18,10 @@ import java.util.logging.Logger;
  * @author Conner
  */
 public class Queen extends Piece{
-    int a = 0;
     Queen(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.QUEEN;
-        if(myPlayer.getColor().equals(Color.white))
+        if(myPlayer.GetPlayerNumber().equals(0))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_queen_1x.png");
         else
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_queen_1x.png");
@@ -32,6 +31,7 @@ public class Queen extends Piece{
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
+        fullSpots.clear();
         boolean stopCheck = false;
         int z = 0;
         

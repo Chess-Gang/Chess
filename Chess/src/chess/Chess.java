@@ -35,26 +35,28 @@ public class Chess extends JFrame implements Runnable {
     public static void main(String[] args) {
         frame = new Chess();
         
-         //Create button to change board to brown
+
+        //Create button to change board to brown
+
         Button brown = new Button("Brown");
         brown.setVisible(false);
         brown.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BROWN);
-            
+
         });
         // Create button to change board to black
         Button black = new Button("Black");
         black.setVisible(false);
         black.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BLACK);
-           
+
         });
         
         //Create button to randomize back row
         randomize.setVisible(false);
         randomize.addActionListener((ActionEvent e) -> {
             Board.RandomizeBackRow();
-            
+
         });
         
         
@@ -126,7 +128,6 @@ public class Chess extends JFrame implements Runnable {
         
         
     }
-    
 
     public static void MenuChange(){
         menuUp = !menuUp;
@@ -219,7 +220,9 @@ public class Chess extends JFrame implements Runnable {
             gOld.drawImage(image, 0, 0, null);
             return;
         }
+
         Board.firstScreen(g);
+
         if(Chess.normalMode || Chess.P4Mode){
             Board.Draw(g);
             for (int zi = 0;zi<Board.BOARD_SIZE;zi++)

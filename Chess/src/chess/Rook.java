@@ -18,11 +18,10 @@ import java.util.logging.Logger;
  * @author Conner
  */
 public class Rook extends Piece{
-    int a = 0;
     Rook(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.ROOK;
-        if(myPlayer.getColor().equals(Color.white))
+        if(myPlayer.GetPlayerNumber().equals(0))
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_rook_1x.png");
         else
             pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_rook_1x.png");
@@ -32,6 +31,7 @@ public class Rook extends Piece{
     }
     public void SetPossibleMoves(int xDelta, int yDelta){
         emptySpots.clear();
+        fullSpots.clear();
         boolean stopCheck = false;
         
         for(int i = yPos - 1; i >= 0 && !stopCheck; i--){//vertical UP
