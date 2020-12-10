@@ -35,21 +35,33 @@ public class Chess extends JFrame implements Runnable {
     public static void main(String[] args) {
         frame = new Chess();
         
+
         //Create button to change board to brown
+
         Button brown = new Button("Brown");
+        brown.setVisible(false);
         brown.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BROWN);
-            //JOptionPane.showMessageDialog(frame, "You've clicked OK button");//this shows a little pop up window with that text
+
         });
         // Create button to change board to black
         Button black = new Button("Black");
+        black.setVisible(false);
         black.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BLACK);
-            //JOptionPane.showMessageDialog(frame,"You've clicked Cancel button");//this shows a little pop up window with that text
+
         });
+        
+        //Create button to randomize back row
+        randomize.setVisible(false);
         randomize.addActionListener((ActionEvent e) -> {
             Board.RandomizeBackRow();
+
         });
+        
+        
+        //For some reason, when clicked, the buttons jump to the bottom???
+        
         normalModeBut.addActionListener((ActionEvent e) -> {
             Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
             Chess.MenuChange();
@@ -59,7 +71,20 @@ public class Chess extends JFrame implements Runnable {
             normalMode = true;
             //currentBoard = new Board();
             Board.NormalReset();
-            P4ModeBut.disable();
+            
+            //switches to the screen
+                Board.start();
+                
+                //removes the start button, makes others visible
+                normalModeBut.setVisible(false);
+                P4ModeBut.setVisible(false);
+                black.setVisible(true);
+                brown.setVisible(true);
+                randomize.setVisible(true);
+                
+                //repaints the panel, switches to the correct buttons
+                buttonPanel.revalidate();
+                buttonPanel.repaint();
         });
         P4ModeBut.addActionListener((ActionEvent e) -> {
             Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
@@ -70,8 +95,23 @@ public class Chess extends JFrame implements Runnable {
             P4Mode = true;
             //currentBoard = new P4Board();
             Board.P4Reset();
-            normalModeBut.disable();
+            
+            //switches to the screen
+                Board.start();
+                
+            //removes the starting buttons, makes others visible
+                P4ModeBut.setVisible(false);
+                normalModeBut.setVisible(false);
+                black.setVisible(true);
+                brown.setVisible(true);
+                randomize.setVisible(true);
+                
+                //repaints the panel, switches to the correct buttons
+                buttonPanel.revalidate();
+                buttonPanel.repaint();
         });
+        
+        
         // Add buttons to a panel
         buttonPanel = new JPanel( );
         buttonPanel.add(normalModeBut);
@@ -85,7 +125,10 @@ public class Chess extends JFrame implements Runnable {
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+        
+        
     }
+
     public static void MenuChange(){
         menuUp = !menuUp;
         if(menuUp)
@@ -177,6 +220,9 @@ public class Chess extends JFrame implements Runnable {
             gOld.drawImage(image, 0, 0, null);
             return;
         }
+
+        Board.firstScreen(g);
+
         if(Chess.normalMode || Chess.P4Mode){
             Board.Draw(g);
             for (int zi = 0;zi<Board.BOARD_SIZE;zi++)
@@ -207,7 +253,8 @@ public class Chess extends JFrame implements Runnable {
     }
     
 /////////////////////////////////////////////////////////////////////////
-    public void reset() {
+    public static void reset() {
+        
         Chess.randomize.enable();
         //board[0] = new Board();
         //board[1] = new P4Board();

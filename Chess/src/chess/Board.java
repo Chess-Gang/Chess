@@ -45,6 +45,11 @@ public class Board{
     static int counter;//these ints prevent a concurrent modification error that somtime happened at start
     static int allPiecesSize1;
     static int allPiecesSize2;
+
+    //for the start & end screens
+    private static boolean start;
+    private static Color myColor = new Color(86, 87, 89, 50);
+
     
     public static void NormalReset() {
         board = new Piece[NUM_ROWS][NUM_COLUMNS];
@@ -141,7 +146,7 @@ public class Board{
         allPieces.add(new Bishop(4, 0, Player.players[0]));
         for(int i = 0; i < 8; i++)
             allPieces.add(new Pawn(i + 2, 1, Player.players[0]));
-        
+
         //player1's pieces (black)
         allPieces.add(new Queen(6, NUM_ROWS - 1, Player.players[1]));
         Rook _1leftRook = new Rook(2, NUM_ROWS - 1, Player.players[1]);
@@ -155,7 +160,7 @@ public class Board{
         allPieces.add(new Bishop(4, NUM_ROWS - 1, Player.players[1]));
         for(int i = 0; i < 8; i++)
             allPieces.add(new Pawn(i + 2, NUM_ROWS - 2, Player.players[1]));
-        
+
         //player2's pieces (black)
         allPieces.add(new Queen(0, 6, Player.players[2]));
         Rook _2leftRook = new Rook(0, 2, Player.players[2]);
@@ -281,6 +286,7 @@ public class Board{
     
     //move/select the piece the mouse clicked on
     public static void PickPiece(int x, int y){
+        if(start){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
         clip.drain();//this makes sure that the sound is done playing before the next move
@@ -338,6 +344,7 @@ public class Board{
                     return;
                 }
             }
+        }
         }
     } 
     
@@ -465,6 +472,7 @@ public class Board{
     
     //Draw on the board.    
     public static void Draw(Graphics2D g) {
+        if(start){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
         graphic = g;
@@ -530,24 +538,32 @@ public class Board{
         }
     //Display if a player has won.
         if (winner == WinState.WIN_P1) {
+            g.setColor(myColor);
+            g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
             g.setColor(Color.black);
             g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
             g.setColor(Color.white);
             g.setFont(new Font("Arial",Font.PLAIN,50));
             g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
         } else if (winner == WinState.WIN_P2) {
+            g.setColor(myColor);
+            g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
             g.setColor(Color.white);
             g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
             g.setColor(Color.black);
             g.setFont(new Font("Arial",Font.PLAIN,50));
             g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
         } else if (winner == WinState.TIE) {
+            g.setColor(myColor);
+            g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
             g.setColor(Color.white);
             g.setFont(new Font("Arial",Font.PLAIN,20));
             g.drawString("It is a tie",40,65);                
         }
+        }
     }
     public static void DrawPiece() {
+        if(start){
         int ydelta = Window.getHeight2()/NUM_ROWS;
         int xdelta = Window.getWidth2()/NUM_COLUMNS;
         Board.Draw(graphic);
@@ -555,5 +571,24 @@ public class Board{
         graphic.fillRect(xdelta, ydelta, 200, 200);
         graphic.drawImage(selectedPiece.pieceImage,Window.getX(xdelta*selectedPiece.xPos),Window.getY(ydelta*selectedPiece.yPos),xdelta + 4,ydelta + 4,observe);
         //*/
+        }
     }
+    //sets start to true, activates the screen switching
+    public static void start(){
+        start = true;
+    }
+   
+    //paints the first screen
+    public static void firstScreen(Graphics2D g) {
+        if(start == false)
+        g.setColor(Color.GRAY);
+        g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial",Font.PLAIN,50));
+        g.drawString("WELCOME TO CHESS!",75,Window.WINDOW_HEIGHT/2);
+        
+    }
+    
+    
+    
 }
