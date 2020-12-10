@@ -4,44 +4,38 @@ package chess;
  *
  * @author Conner
  */
-import java.io.*;
+import static chess.Board.BOARD_SIZE;
 import java.awt.*;
-import java.awt.geom.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.sound.sampled.*;
 
 public class Chess extends JFrame implements Runnable {
-    boolean animateFirstTime = true;
-    Image image;
-    static Graphics2D g;
-    String[] letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+    //UI / Frame Stuff
+    static Button normalModeBut = new Button("Normal Chess");;
+    static Button P4ModeBut = new Button("4 Player Chess");;
     static Button randomize = new Button("Randomize");
-    static boolean menuUp;
     static Chess frame;
     static JPanel buttonPanel;
-//    static JButton start;
-//    static JButton brown;
-//    static JButton black;
-    static boolean checkStart = false;
+    boolean animateFirstTime = true;   
+    static boolean menuUp;
+    
+    //Game Mode Info
+    public static boolean normalMode;
+    public static boolean P4Mode;
+    
+    //Graphichs
+    Image image;
+    static Graphics2D g;
+    
+    //Arrays
+    String[] letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};   
+ 
     
     public static void main(String[] args) {
         frame = new Chess();
-        frame.buttons();
-        frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
-        frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }
-    public void buttons(){
         
-        //Create button to change board to brown
-        //buttons may cause screen to go white in the build version or in the editor IF THIS HAPPENS just comment out this chunk of code starting here ending at frame.getContentPane( ).add(buttonPanel,BorderLayout.SOUTH);
-        //white screen is cause by the window.getwidth2() return the wrong nnumber because the buttons mess with it for some reason?
-        
-        //Create button to change board to brown
+         //Create button to change board to brown
         Button brown = new Button("Brown");
         brown.setVisible(false);
         brown.addActionListener((ActionEvent e) -> {
@@ -63,16 +57,25 @@ public class Chess extends JFrame implements Runnable {
             
         });
         
-        //create start button
-        Button start = new Button("Start");
-        start.setVisible(true);
-        start.addActionListener((ActionEvent e) -> {          
-            if(e.getSource()== start){
-                //switches to the screen
+        
+        //For some reason, when clicked, the buttons jump to the bottom???
+        
+        normalModeBut.addActionListener((ActionEvent e) -> {
+            Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
+            Chess.MenuChange();
+            Board.BOARD_SIZE = 8;
+            Board.NUM_ROWS = 8;
+            Board.NUM_COLUMNS = 8;
+            normalMode = true;
+            //currentBoard = new Board();
+            Board.NormalReset();
+            
+            //switches to the screen
                 Board.start();
                 
                 //removes the start button, makes others visible
-                start.setVisible(false);
+                normalModeBut.setVisible(false);
+                P4ModeBut.setVisible(false);
                 black.setVisible(true);
                 brown.setVisible(true);
                 randomize.setVisible(true);
@@ -80,22 +83,51 @@ public class Chess extends JFrame implements Runnable {
                 //repaints the panel, switches to the correct buttons
                 buttonPanel.revalidate();
                 buttonPanel.repaint();
-               
-            }
-         });
+        });
+        P4ModeBut.addActionListener((ActionEvent e) -> {
+            Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
+            Chess.MenuChange();
+            Board.BOARD_SIZE = 12;
+            Board.NUM_ROWS = 12;
+            Board.NUM_COLUMNS = 12;
+            P4Mode = true;
+            //currentBoard = new P4Board();
+            Board.P4Reset();
+            
+            //switches to the screen
+                Board.start();
+                
+            //removes the starting buttons, makes others visible
+                P4ModeBut.setVisible(false);
+                normalModeBut.setVisible(false);
+                black.setVisible(true);
+                brown.setVisible(true);
+                randomize.setVisible(true);
+                
+                //repaints the panel, switches to the correct buttons
+                buttonPanel.revalidate();
+                buttonPanel.repaint();
+        });
         
-        //adds buttons to the panel
+        
+        // Add buttons to a panel
         buttonPanel = new JPanel( );
-        buttonPanel.add(start);
+        buttonPanel.add(normalModeBut);
+        buttonPanel.add(P4ModeBut);
         buttonPanel.add(brown);
         buttonPanel.add(black);
         buttonPanel.add(randomize);
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         
-       
+        frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
+        frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        
+        
     }
-    ////////////////////////////////////////////////////////////////
-    // ignore these methods for now i was thinking of maybe adding in a menu that can be opened and closed but for now just leave them
+    
+
     public static void MenuChange(){
         menuUp = !menuUp;
         if(menuUp)
@@ -135,7 +167,7 @@ public class Chess extends JFrame implements Runnable {
             //repaint();
           }
         });
-        addKeyListener(new KeyAdapter() {//not registering keys, need to fix it
+        addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.VK_UP == e.getKeyCode()) {
                 } else if (e.VK_DOWN == e.getKeyCode()) {
@@ -187,16 +219,16 @@ public class Chess extends JFrame implements Runnable {
             gOld.drawImage(image, 0, 0, null);
             return;
         }
-        
         Board.firstScreen(g);
-        Board.Draw(g);
-        
-        for (int zi = 0;zi<Board.BOARD_SIZE;zi++)
-        {
-            g.setColor(Color.white);
-            g.setFont(new Font("Arial",Font.PLAIN,15));
-            g.drawString(letters[zi], zi*(Window.getWidth2() / Board.BOARD_SIZE) + 40, Window.getY(-2));
-            g.drawString(Integer.toString(zi + 1),Window.getX(-10), zi*(Window.getHeight2()/ Board.BOARD_SIZE) + 95);
+        if(Chess.normalMode || Chess.P4Mode){
+            Board.Draw(g);
+            for (int zi = 0;zi<Board.BOARD_SIZE;zi++)
+            {
+                g.setColor(Color.white);
+                g.setFont(new Font("Arial",Font.PLAIN,15));
+                g.drawString(letters[zi], zi*(Window.getWidth2() / Board.BOARD_SIZE) + 40, Window.getY(-2));
+                g.drawString(Integer.toString(zi + 1),Window.getX(-20), zi*(Window.getHeight2()/ Board.BOARD_SIZE) + 95);
+            }
         }
         gOld.drawImage(image, 0, 0, null);
     }
@@ -218,15 +250,20 @@ public class Chess extends JFrame implements Runnable {
     }
     
 /////////////////////////////////////////////////////////////////////////
-    public void reset() {
-        Chess.randomize.enable();
-        Player.Reset();
-        Board.Reset();
+    public static void reset() {
         
-        //when reset the board using buttons();, the randomize button is lost
-        //my guess is because it is a global variable vs a local variable like the other buttons
-        //also, the randomize button is lost, and when clicked reset, the blk & brn buttons do not change
-        //buttons();
+        Chess.randomize.enable();
+        //board[0] = new Board();
+        //board[1] = new P4Board();
+        Player.Reset();
+        if(Chess.normalMode){
+            Board.BOARD_SIZE = 8;
+            Board.NormalReset();
+        }
+        else if(Chess.P4Mode){
+            Board.BOARD_SIZE = 12;
+            Board.P4Reset();
+        }
     }
 /////////////////////////////////////////////////////////////////////////
     public void animate() {
