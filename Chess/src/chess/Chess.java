@@ -57,10 +57,10 @@ public class Chess extends JFrame implements Runnable {
             Board.NUM_ROWS = 8;
             Board.NUM_COLUMNS = 8;
             normalMode = true;
-            //currentBoard = new Board();
             Board.NormalReset();
             P4ModeBut.disable();
         });
+        //P4ModeBut.setToolTipText("Alows for 4 Player chess");//works only on JButtons
         P4ModeBut.addActionListener((ActionEvent e) -> {
             Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
             Chess.MenuChange();
@@ -68,19 +68,21 @@ public class Chess extends JFrame implements Runnable {
             Board.NUM_ROWS = 12;
             Board.NUM_COLUMNS = 12;
             P4Mode = true;
-            //currentBoard = new P4Board();
             Board.P4Reset();
             normalModeBut.disable();
         });
+        
         // Add buttons to a panel
-        buttonPanel = new JPanel( );
+        buttonPanel = new JPanel();
         buttonPanel.add(normalModeBut);
         buttonPanel.add(P4ModeBut);
         buttonPanel.add(brown);
         buttonPanel.add(black);
         buttonPanel.add(randomize);
-        frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
+        frame.getContentPane().add(buttonPanel, BorderLayout.NORTH);
         
+        
+        frame.setTitle("Chess 2");
         frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
         frame.setSize(Window.WINDOW_WIDTH, Window.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -107,8 +109,8 @@ public class Chess extends JFrame implements Runnable {
                     reset();
                 }
                 if (e.BUTTON2 == e.getButton()) {
-                    Chess.MenuChange();
-                    //reset();
+                    //Chess.MenuChange();
+                    FullReset();
                 }
                 repaint();
             }
@@ -209,17 +211,18 @@ public class Chess extends JFrame implements Runnable {
 /////////////////////////////////////////////////////////////////////////
     public void reset() {
         Chess.randomize.enable();
-        //board[0] = new Board();
-        //board[1] = new P4Board();
         Player.Reset();
-        if(Chess.normalMode){
-            Board.BOARD_SIZE = 8;
+        if(Chess.normalMode)
             Board.NormalReset();
-        }
-        else if(Chess.P4Mode){
-            Board.BOARD_SIZE = 12;
+        else if(Chess.P4Mode)
             Board.P4Reset();
-        }
+    }
+    public void FullReset() {
+        Chess.normalMode = false;
+        Chess.P4Mode = false;
+        Chess.randomize.enable();
+        Chess.P4ModeBut.enable();
+        Chess.normalModeBut.enable();
     }
 /////////////////////////////////////////////////////////////////////////
     public void animate() {
