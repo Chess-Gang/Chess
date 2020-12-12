@@ -25,10 +25,30 @@ public class Pawn extends Piece{
     Pawn(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.PAWN;
-        if(myPlayer.GetPlayerNumber().equals(0))
-            pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_pawn_1x.png");
-        else
-            pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_pawn_1x.png");
+        if(Chess.normalMode){
+            if(myPlayer.GetPlayerNumber().equals(0))
+                pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_pawn_1x.png");
+            else
+                pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_pawn_1x.png");
+        }
+        else if(Chess.P4Mode){
+            switch (myPlayer.GetPlayerNumber()) {
+                case 0:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/blu_pawn_1x.png");
+                    break;
+                case 1:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/r_pawn_1x.png");
+                    break;
+                case 2:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/g_pawn_1x.png");
+                    break;
+                case 3:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/y_pawn_1x.png");
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     public Image GetImage(){
         return(pieceImage);
