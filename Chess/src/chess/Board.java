@@ -21,8 +21,6 @@ public class Board{
     //Enums
     private enum WinState {NO_WIN,TIE,WIN_P1,WIN_P2,WIN_P3,WIN_P4};
     private static WinState winner;
-    //private static enum CheckState {P1_CHECK, P2_CHECK, P3_CHECK, P4_CHECK};
-    //private static CheckState inCheck;//determines if a king is in check and which one
     
     //Audio
     private static Clip clip;//the chess sound
@@ -336,7 +334,8 @@ public class Board{
                 for(FullSpace space : selectedPiece.fullSpots){
                     if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
                        Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
-                        selectedPiece.takenPiece = GetPieceMouse(x, y).myPieceType;
+                        if(Chess.moveStealEnabled)
+                            selectedPiece.takenPiece = GetPieceMouse(x, y).myPieceType;
                         removePiece = GetPieceMouse(x, y);
                         board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
                         board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
@@ -576,6 +575,10 @@ public class Board{
     //sets start to true, activates the screen switching
     public static void start(){
         start = true;
+    }
+    //sets start to false, de-activates the screen switching
+    public static void stop(){
+        start = false;
     }
    
     //paints the first screen
