@@ -1,9 +1,6 @@
 package chess;
 
-/**
- *
- * @author Conner
- */
+
 import static chess.Board.BOARD_SIZE;
 import java.awt.*;
 import java.awt.event.*;
@@ -18,6 +15,7 @@ public class Chess extends JFrame implements Runnable {
     static Button moveStealBut = new Button("Move Steal");
     static Button brown = new Button("Brown");
     static Button black = new Button("Black");
+    static Button NewGame = new Button("New Game");
     static Chess frame;
     static JPanel buttonPanel;
     boolean animateFirstTime = true;   
@@ -65,9 +63,25 @@ public class Chess extends JFrame implements Runnable {
             JOptionPane.showMessageDialog(frame,"Move Steal is now " + state);
 
         });
+        //Button NewGame = new Button("New Game");
+        NewGame.setVisible(false);
+        NewGame.addActionListener((ActionEvent e) -> {
+            Chess.randomize.enable();        
+            Player.NewGameReset();
+            if(Chess.normalMode){
+                Board.BOARD_SIZE = 8;
+                Board.NormalReset();
+            }
+            else if(Chess.P4Mode){
+                Board.BOARD_SIZE = 12;
+                Board.P4Reset();
+            }
+
+        });
         
-        //For some reason, when clicked, the buttons jump to the bottom???//this is becaysewe need to set its border layout to NORTH again
-        // just need to add this line to the buttons frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
+        
+        //For some reason, when clicked, the buttons jump to the bottom???
+        
         normalModeBut.addActionListener((ActionEvent e) -> {
             Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
             Chess.MenuChange();
@@ -86,7 +100,9 @@ public class Chess extends JFrame implements Runnable {
             black.setVisible(true);
             brown.setVisible(true);
             randomize.setVisible(true);
+            NewGame.setVisible(true);
             moveStealBut.setVisible(true);
+            
 
             //repaints the panel, switches to the correct buttons
             buttonPanel.revalidate();
@@ -112,6 +128,7 @@ public class Chess extends JFrame implements Runnable {
             brown.setVisible(true);
             //randomize.setVisible(true);//randomize doesnt work in P4mode so it can stay invisible
             moveStealBut.setVisible(true);
+            NewGame.setVisible(true);
 
             //repaints the panel, switches to the correct buttons
             buttonPanel.revalidate();
@@ -127,7 +144,10 @@ public class Chess extends JFrame implements Runnable {
         buttonPanel.add(brown);
         buttonPanel.add(black);
         buttonPanel.add(randomize);
+        buttonPanel.add(NewGame);
         buttonPanel.add(moveStealBut);
+        
+        
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         
         frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
@@ -143,7 +163,7 @@ public class Chess extends JFrame implements Runnable {
         if(menuUp)
             frame.getContentPane().remove(buttonPanel);
         else
-            frame.getContentPane().add(buttonPanel,BorderLayout.SOUTH);
+            frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
     }
     public Chess() {
         addMouseListener(new MouseAdapter() {
@@ -241,6 +261,7 @@ public class Chess extends JFrame implements Runnable {
                 g.drawString(letters[zi], zi*(Window.getWidth2() / Board.BOARD_SIZE) + 40, Window.getY(-2));
                 g.drawString(Integer.toString(zi + 1),Window.getX(-20), zi*(Window.getHeight2()/ Board.BOARD_SIZE) + 95);
             }
+            Player.Draw(g);
         }
         gOld.drawImage(image, 0, 0, null);
     }
@@ -281,7 +302,9 @@ public class Chess extends JFrame implements Runnable {
         black.setVisible(false);
         brown.setVisible(false);
         randomize.setVisible(false);
+        randomize.enable();
         moveStealBut.setVisible(false);
+        NewGame.setVisible(false);
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         Board.stop();
         Chess.normalMode = false;

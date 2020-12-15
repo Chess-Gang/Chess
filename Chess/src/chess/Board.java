@@ -293,7 +293,8 @@ public class Board{
                 if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                    Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                     if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
-                        selectedPiece = pec;
+                        if(selectedPiece == null)
+                            selectedPiece = pec;
                         if(Player.GetCurrentPlayer().inCheck){//might want to remove this, because if you want to move a differnt piece to save your king you wont be able to
                             if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
                                 selectedPiece = null;
@@ -374,23 +375,33 @@ public class Board{
         for(Piece pec : allPieces){
             if(pec.xPos == x && pec.yPos == y){
                 piecToRemove = pec;
-                if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1))//Gives win to player1
+                if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
                     winner = WinState.WIN_P1;
-                else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0))//gives win to player2
+                    Player.AddPoint(0);
+                }
+                else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
                     winner = WinState.WIN_P2;
+                    Player.AddPoint(1);
+                        }
             }
         }
         board[piecToRemove.xPos][piecToRemove.yPos] = null;
         allPieces.remove(piecToRemove);
     }
+
     //Remove a piece based off an instance also decided if game has been won
     public static void RemovePiece(Piece pec){
-        if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1))//Gives win to player1
+        if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
             winner = WinState.WIN_P1;
-        else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0))//gives win to player2
+            Player.AddPoint(0);
+        }
+        else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
             winner = WinState.WIN_P2;
+            Player.AddPoint(1);
+                }
         allPieces.remove(pec);
     }
+
     
     //return a piece based on x,y BOARD coords
     public static Piece GetPieceBoard(int x,int y){
