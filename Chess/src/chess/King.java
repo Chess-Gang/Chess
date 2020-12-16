@@ -24,10 +24,30 @@ public class King extends Piece{
     King(int x, int y, Player play, Rook _rook1, Rook _rook2){
         super(x,y,play);
         myPieceType = Piece.pieceType.KING;
-        if(myPlayer.GetPlayerNumber().equals(0))
-            pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_king_1x.png");
-        else
-            pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_king_1x.png");
+        if(Chess.normalMode){
+            if(myPlayer.GetPlayerNumber().equals(0))
+                pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_king_1x.png");
+            else
+                pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_king_1x.png");
+        }
+        else if(Chess.P4Mode){
+            switch (myPlayer.GetPlayerNumber()) {
+                case 0:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/blu_king_1x.png");
+                    break;
+                case 1:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/r_king_1x.png");
+                    break;
+                case 2:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/g_king_1x.png");
+                    break;
+                case 3:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/y_king_1x.png");
+                    break;
+                default:
+                    break;
+            }
+        }
         leftRook = _rook1;
         rightRook = _rook2;
     }

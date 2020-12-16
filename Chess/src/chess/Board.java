@@ -294,7 +294,9 @@ public class Board{
                 if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                    Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                     if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
+
                         selectedPiece = pec;
+
                         if(Player.GetCurrentPlayer().inCheck){//might want to remove this, because if you want to move a differnt piece to save your king you wont be able to
                             if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
                                 selectedPiece = null;
@@ -375,23 +377,33 @@ public class Board{
         for(Piece pec : allPieces){
             if(pec.xPos == x && pec.yPos == y){
                 piecToRemove = pec;
-                if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1))//Gives win to player1
+                if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
                     winner = WinState.WIN_P1;
-                else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0))//gives win to player2
+                    Player.AddPoint(0);
+                }
+                else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
                     winner = WinState.WIN_P2;
+                    Player.AddPoint(1);
+                        }
             }
         }
         board[piecToRemove.xPos][piecToRemove.yPos] = null;
         allPieces.remove(piecToRemove);
     }
+
     //Remove a piece based off an instance also decided if game has been won
     public static void RemovePiece(Piece pec){
-        if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1))//Gives win to player1
+        if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
             winner = WinState.WIN_P1;
-        else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0))//gives win to player2
+            Player.AddPoint(0);
+        }
+        else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
             winner = WinState.WIN_P2;
+            Player.AddPoint(1);
+                }
         allPieces.remove(pec);
     }
+
     
     //return a piece based on x,y BOARD coords
     public static Piece GetPieceBoard(int x,int y){
@@ -560,9 +572,11 @@ public class Board{
                 g.setFont(new Font("Arial",Font.PLAIN,20));
                 g.drawString("It is a tie",40,65);                
             }
+
             
             
         }
+///////////////////////////////////////////////////////////////////////////
         //draws the current player at the top for 2 player
         if(Chess.normalMode){
             g.setColor(Color.WHITE);
@@ -588,6 +602,7 @@ public class Board{
                     g.drawString("Yellow's turn",40,65);
             }
     }
+  //////////////////////////////////////////////////////////////////
     public static void DrawPiece() {
         if(start){
         int ydelta = Window.getHeight2()/NUM_ROWS;
@@ -608,6 +623,7 @@ public class Board{
         start = false;
     }
    
+//////////////////////////// I will work on making this look nicer///////////////////////////
     //paints the first screen
     public static void firstScreen(Graphics2D g) {
         if(start == false)
@@ -615,11 +631,15 @@ public class Board{
         g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial",Font.PLAIN,50));
-        g.drawString("WELCOME TO CHESS!",75,Window.WINDOW_HEIGHT/2);
+        g.drawString("WELCOME TO CHESS!",75,150);
+        g.setFont(new Font("Arial",Font.PLAIN,20));
+        g.drawString("Click 4 player mode to play a 4-way chess game", 110, 200);
+        g.drawString("or click normal mode to play a 2-player chess game", 110, 220);
+        g.drawString("the 'black' & 'brown' buttons change the color of the board", 80, 340);
+        g.drawString("the 'randomize' button change randomize the back row of pieces", 60, 360);
+        g.drawString("If 'move steal' is on, the pieces can steal the moves of other pieces.", 50, 380);
         
     }
     
-    
-    
-    
+
 }

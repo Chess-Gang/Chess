@@ -1,9 +1,6 @@
 package chess;
 
-/**
- *
- * @author Conner
- */
+
 import static chess.Board.BOARD_SIZE;
 import java.awt.*;
 import java.awt.event.*;
@@ -12,9 +9,13 @@ import java.awt.event.ActionEvent;
 
 public class Chess extends JFrame implements Runnable {
     //UI / Frame Stuff
-    static Button normalModeBut = new Button("Normal Chess");;
-    static Button P4ModeBut = new Button("4 Player Chess");;
+    static Button normalModeBut = new Button("Normal Chess");
+    static Button P4ModeBut = new Button("4 Player Chess");
     static Button randomize = new Button("Randomize");
+    static Button moveStealBut = new Button("Move Steal");
+    static Button brown = new Button("Brown");
+    static Button black = new Button("Black");
+    static Button NewGame = new Button("New Game");
     static Chess frame;
     static JPanel buttonPanel;
     boolean animateFirstTime = true;   
@@ -23,6 +24,7 @@ public class Chess extends JFrame implements Runnable {
     //Game Mode Info
     public static boolean normalMode;
     public static boolean P4Mode;
+    public static boolean moveStealEnabled;
     
     //Graphichs
     Image image;
@@ -35,27 +37,45 @@ public class Chess extends JFrame implements Runnable {
     public static void main(String[] args) {
         frame = new Chess();
         
-
         //Create button to change board to brown
-
-        Button brown = new Button("Brown");
         brown.setVisible(false);
         brown.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BROWN);
 
         });
         // Create button to change board to black
-        Button black = new Button("Black");
         black.setVisible(false);
         black.addActionListener((ActionEvent e) -> {
             Board.SwitchBoardColor(Board.BackroundType.BLACK);
 
         });
-        
         //Create button to randomize back row
         randomize.setVisible(false);
         randomize.addActionListener((ActionEvent e) -> {
             Board.RandomizeBackRow();
+
+        });
+        //Create button to randomize back row
+        moveStealBut.setVisible(false);
+        moveStealBut.addActionListener((ActionEvent e) -> {
+            moveStealEnabled = !moveStealEnabled;
+            String state = moveStealEnabled ? "enabled" : "disabled";
+            JOptionPane.showMessageDialog(frame,"Move Steal is now " + state);
+
+        });
+        //Button NewGame = new Button("New Game");
+        NewGame.setVisible(false);
+        NewGame.addActionListener((ActionEvent e) -> {
+            Chess.randomize.enable();        
+            Player.NewGameReset();
+            if(Chess.normalMode){
+                Board.BOARD_SIZE = 8;
+                Board.NormalReset();
+            }
+            else if(Chess.P4Mode){
+                Board.BOARD_SIZE = 12;
+                Board.P4Reset();
+            }
 
         });
         
@@ -69,22 +89,25 @@ public class Chess extends JFrame implements Runnable {
             Board.NUM_ROWS = 8;
             Board.NUM_COLUMNS = 8;
             normalMode = true;
-            //currentBoard = new Board();
             Board.NormalReset();
             
             //switches to the screen
-                Board.start();
-                
-                //removes the start button, makes others visible
-                normalModeBut.setVisible(false);
-                P4ModeBut.setVisible(false);
-                black.setVisible(true);
-                brown.setVisible(true);
-                randomize.setVisible(true);
-                
-                //repaints the panel, switches to the correct buttons
-                buttonPanel.revalidate();
-                buttonPanel.repaint();
+            Board.start();
+
+            //removes the start button, makes others visible
+            normalModeBut.setVisible(false);
+            P4ModeBut.setVisible(false);
+            black.setVisible(true);
+            brown.setVisible(true);
+            randomize.setVisible(true);
+            NewGame.setVisible(true);
+            moveStealBut.setVisible(true);
+            
+
+            //repaints the panel, switches to the correct buttons
+            buttonPanel.revalidate();
+            buttonPanel.repaint();
+            frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);//this line sets the buttons to the top again
         });
         P4ModeBut.addActionListener((ActionEvent e) -> {
             Chess.MenuChange();//without these two menuChanges the frame wont register keys for some reason?
@@ -93,22 +116,24 @@ public class Chess extends JFrame implements Runnable {
             Board.NUM_ROWS = 12;
             Board.NUM_COLUMNS = 12;
             P4Mode = true;
-            //currentBoard = new P4Board();
             Board.P4Reset();
             
             //switches to the screen
-                Board.start();
+            Board.start();
                 
             //removes the starting buttons, makes others visible
-                P4ModeBut.setVisible(false);
-                normalModeBut.setVisible(false);
-                black.setVisible(true);
-                brown.setVisible(true);
-                randomize.setVisible(true);
-                
-                //repaints the panel, switches to the correct buttons
-                buttonPanel.revalidate();
-                buttonPanel.repaint();
+            P4ModeBut.setVisible(false);
+            normalModeBut.setVisible(false);
+            black.setVisible(true);
+            brown.setVisible(true);
+            //randomize.setVisible(true);//randomize doesnt work in P4mode so it can stay invisible
+            moveStealBut.setVisible(true);
+            NewGame.setVisible(true);
+
+            //repaints the panel, switches to the correct buttons
+            buttonPanel.revalidate();
+            buttonPanel.repaint();
+            frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);//this line sets the buttons to the top again
         });
         
         
@@ -119,6 +144,10 @@ public class Chess extends JFrame implements Runnable {
         buttonPanel.add(brown);
         buttonPanel.add(black);
         buttonPanel.add(randomize);
+        buttonPanel.add(NewGame);
+        buttonPanel.add(moveStealBut);
+        
+        
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         
         frame.setFocusable(true);//makes the screen take into a count key inputs adding the jPanel messes with that I think but this line prevents any problems with key inputs
@@ -134,7 +163,7 @@ public class Chess extends JFrame implements Runnable {
         if(menuUp)
             frame.getContentPane().remove(buttonPanel);
         else
-            frame.getContentPane().add(buttonPanel,BorderLayout.SOUTH);
+            frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
     }
     public Chess() {
         addMouseListener(new MouseAdapter() {
@@ -150,8 +179,8 @@ public class Chess extends JFrame implements Runnable {
                     reset();
                 }
                 if (e.BUTTON2 == e.getButton()) {
-                    Chess.MenuChange();
-                    //reset();
+                    //Chess.MenuChange();
+                    Fullreset();
                 }
                 repaint();
             }
@@ -232,6 +261,7 @@ public class Chess extends JFrame implements Runnable {
                 g.drawString(letters[zi], zi*(Window.getWidth2() / Board.BOARD_SIZE) + 40, Window.getY(-2));
                 g.drawString(Integer.toString(zi + 1),Window.getX(-20), zi*(Window.getHeight2()/ Board.BOARD_SIZE) + 95);
             }
+            Player.Draw(g);
         }
         gOld.drawImage(image, 0, 0, null);
     }
@@ -254,10 +284,8 @@ public class Chess extends JFrame implements Runnable {
     
 /////////////////////////////////////////////////////////////////////////
     public static void reset() {
-        
+        Chess.moveStealEnabled = false;
         Chess.randomize.enable();
-        //board[0] = new Board();
-        //board[1] = new P4Board();
         Player.Reset();
         if(Chess.normalMode){
             Board.BOARD_SIZE = 8;
@@ -267,6 +295,20 @@ public class Chess extends JFrame implements Runnable {
             Board.BOARD_SIZE = 12;
             Board.P4Reset();
         }
+    }
+    public static void Fullreset() {
+        P4ModeBut.setVisible(true);
+        normalModeBut.setVisible(true);
+        black.setVisible(false);
+        brown.setVisible(false);
+        randomize.setVisible(false);
+        randomize.enable();
+        moveStealBut.setVisible(false);
+        NewGame.setVisible(false);
+        frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
+        Board.stop();
+        Chess.normalMode = false;
+        Chess.P4Mode = false;
     }
 /////////////////////////////////////////////////////////////////////////
     public void animate() {

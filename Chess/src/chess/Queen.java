@@ -21,10 +21,30 @@ public class Queen extends Piece{
     Queen(int x, int y, Player play){
         super(x,y,play);
         myPieceType = Piece.pieceType.QUEEN;
-        if(myPlayer.GetPlayerNumber().equals(0))
-            pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_queen_1x.png");
-        else
-            pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_queen_1x.png");
+        if(Chess.normalMode){
+            if(myPlayer.GetPlayerNumber().equals(0))
+                pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/w_queen_1x.png");
+            else
+                pieceImage = Toolkit.getDefaultToolkit().getImage("./Chess Sprites/b_queen_1x.png");
+        }
+        else if(Chess.P4Mode){
+            switch (myPlayer.GetPlayerNumber()) {
+                case 0:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/blu_queen_1x.png");
+                    break;
+                case 1:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/r_queen_1x.png");
+                    break;
+                case 2:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/g_queen_1x.png");
+                    break;
+                case 3:
+                    pieceImage = Toolkit.getDefaultToolkit().getImage("./colored/y_queen_1x.png");
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     public Image GetImage(){
         return(pieceImage);
