@@ -1,6 +1,7 @@
 package chess;
 
 
+import static chess.Chess.normalMode;
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.image.ImageObserver;
@@ -21,8 +22,6 @@ public class Board{
     //Enums
     private enum WinState {NO_WIN,TIE,WIN_P1,WIN_P2,WIN_P3,WIN_P4};
     private static WinState winner;
-    //private static enum CheckState {P1_CHECK, P2_CHECK, P3_CHECK, P4_CHECK};
-    //private static CheckState inCheck;//determines if a king is in check and which one
     
     //Audio
     private static Clip clip;//the chess sound
@@ -287,64 +286,65 @@ public class Board{
     //move/select the piece the mouse clicked on
     public static void PickPiece(int x, int y){
         if(start){
-        int ydelta = Window.getHeight2()/NUM_ROWS;
-        int xdelta = Window.getWidth2()/NUM_COLUMNS;
-        clip.drain();//this makes sure that the sound is done playing before the next move
-        //System.out.println(x + ", " + y);
-        for(Piece pec : allPieces){
-            if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
-               Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
-                if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
-                    selectedPiece = pec;
-                    if(Player.GetCurrentPlayer().inCheck){//might want to remove this, because if you want to move a differnt piece to save your king you wont be able to
-                        if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
-                            selectedPiece = null;
-                            return;
+            int ydelta = Window.getHeight2()/NUM_ROWS;
+            int xdelta = Window.getWidth2()/NUM_COLUMNS;
+            clip.drain();//this makes sure that the sound is done playing before the next move
+            //System.out.println(x + ", " + y);
+            for(Piece pec : allPieces){
+                if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
+                   Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
+                    if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
+                        selectedPiece = pec;
+                        if(Player.GetCurrentPlayer().inCheck){//might want to remove this, because if you want to move a differnt piece to save your king you wont be able to
+                            if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
+                                selectedPiece = null;
+                                return;
+                            }
+                            selectedPiece.SetPossibleMoves(xdelta, ydelta);
+                            if(selectedPiece.takenPiece != null)
+                                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece); 
                         }
-                        selectedPiece.SetPossibleMoves(xdelta, ydelta);
-                        if(selectedPiece.takenPiece != null)
-                            selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece); 
-                    }
-                    else{
-                        selectedPiece.SetPossibleMoves(xdelta, ydelta);
-                        if(selectedPiece.takenPiece != null)
-                            selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                        else{
+                            selectedPiece.SetPossibleMoves(xdelta, ydelta);
+                            if(selectedPiece.takenPiece != null)
+                                selectedPiece.SetPossibleMoves(xdelta, ydelta, selectedPiece.takenPiece);
+                        }
                     }
                 }
             }
-        }
-        if(selectedPiece != null && selectedPiece.myPlayer == Player.GetCurrentPlayer()){
-            for(EmptySpace space : selectedPiece.emptySpots){
-                if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
-                   Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
-                    board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
-                    board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
-                    selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
-                    selectedPiece.firstUniqueMove = false;
-                    selectedPiece.takenPiece = null;
-                    Chess.randomize.disable();
-                    if(space.rook != null){//moves the rook when casteling
-                        space.rook.firstUniqueMove = false;
-                        board[space.rook.xPos][space.rook.yPos] = null;
-                        space.rook.xPos = space.rookXPos;
-                        space.rook.yPos = space.rookYPos;
-                        board[space.rook.xPos][space.rook.yPos] = space.rook;
+            if(selectedPiece != null && selectedPiece.myPlayer == Player.GetCurrentPlayer()){
+                for(EmptySpace space : selectedPiece.emptySpots){
+                    if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
+                       Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
+                        board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
+                        board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
+                        selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
+                        selectedPiece.firstUniqueMove = false;
+                        selectedPiece.takenPiece = null;
+                        Chess.randomize.disable();
+                        if(space.rook != null){//moves the rook when casteling
+                            space.rook.firstUniqueMove = false;
+                            board[space.rook.xPos][space.rook.yPos] = null;
+                            space.rook.xPos = space.rookXPos;
+                            space.rook.yPos = space.rookYPos;
+                            board[space.rook.xPos][space.rook.yPos] = space.rook;
+                        }
+                        return;
                     }
-                    return;
+                }
+                for(FullSpace space : selectedPiece.fullSpots){
+                    if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
+                       Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
+                        if(Chess.moveStealEnabled)
+                            selectedPiece.takenPiece = GetPieceMouse(x, y).myPieceType;
+                        removePiece = GetPieceMouse(x, y);
+                        board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
+                        board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
+                        selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
+                        return;
+                    }
                 }
             }
-            for(FullSpace space : selectedPiece.fullSpots){
-                if(Window.getX(x) > Window.getX(xdelta*space.xPos) && Window.getX(x) < Window.getX(xdelta*space.xPos + xdelta) &&
-                   Window.getY(y) > Window.getY(ydelta*space.yPos) && Window.getY(y) < Window.getY(ydelta*space.yPos + ydelta)){
-                    selectedPiece.takenPiece = GetPieceMouse(x, y).myPieceType;
-                    removePiece = GetPieceMouse(x, y);
-                    board[selectedPiece.xPos][selectedPiece.yPos] = null;//gets rid of current spot on board[][]
-                    board[space.xPos][space.yPos] = selectedPiece;//adds the new space the piece is in on [][]
-                    selectedPiece.SetMove(space.xPos, space.yPos, xdelta, ydelta);
-                    return;
-                }
-            }
-        }
         }
     } 
     
@@ -473,94 +473,120 @@ public class Board{
     //Draw on the board.    
     public static void Draw(Graphics2D g) {
         if(start){
-        int ydelta = Window.getHeight2()/NUM_ROWS;
-        int xdelta = Window.getWidth2()/NUM_COLUMNS;
-        graphic = g;
-        for (int zrow=0;zrow<NUM_ROWS;zrow++)
-        {
-            for (int zcol=0;zcol<NUM_COLUMNS;zcol++)        
+            int ydelta = Window.getHeight2()/NUM_ROWS;
+            int xdelta = Window.getWidth2()/NUM_COLUMNS;
+            graphic = g;
+            for (int zrow=0;zrow<NUM_ROWS;zrow++)
             {
-                if((zrow + zcol) % 2 == 0)
-                    g.drawImage(curBoardSquare1,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
-                else
-                    g.drawImage(curBoardSquare2,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
-            }
-        }
-    //Draw the grid.        
-        g.setColor(Color.black);
-        for (int zi = 1;zi<NUM_ROWS;zi++)
-        {
-            g.drawLine(Window.getX(0),Window.getY(zi*ydelta),
-                    Window.getX(Window.getWidth2()),Window.getY(zi*ydelta));
-        }
-
-        for (int zi = 1;zi<NUM_COLUMNS;zi++)
-        {
-            g.drawLine(Window.getX(zi*xdelta),Window.getY(0),
-                    Window.getX(zi*xdelta),Window.getY(Window.getHeight2()));
-        }
-    //draw possible moves
-        boolean activePiece = selectedPiece != null;
-        if(activePiece && selectedPiece.myPlayer == Player.GetCurrentPlayer() && !selectedPiece.moving)
-            selectedPiece.DrawPossibleMoves(g,xdelta,ydelta);
-    //draw the pieces
-        counter++;
-        if(counter % 2 == 0)// this prevents the concurrent modification error that happens at start somtimes
-            allPiecesSize1 = allPieces.size();
-        else if(counter % 2 == 1)
-            allPiecesSize2 = allPieces.size();
-        if(allPiecesSize1 == allPiecesSize2){
-            for(Piece pec : allPieces){
-                if(pec != selectedPiece)
-                    g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
-                else if(!selectedPiece.moving)
-                    g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
-            }
-        }
-    //Run the animation method
-        if(activePiece && selectedPiece.moving)
-            selectedPiece.Move(xdelta, ydelta, g);
-    //Display in check or not
-        if(Player.PlayerInCheck){
-            String checkString = "";
-            int playersInCheck = 0;
-            for(Player play : Player.players){
-                if (play.inCheck) {
-                    g.setFont(new Font("Arial",Font.PLAIN,25));
-                    checkString += "|" + (play.GetPlayerNumber() + 1) + "| ";
-                    playersInCheck++;
+                for (int zcol=0;zcol<NUM_COLUMNS;zcol++)        
+                {
+                    if((zrow + zcol) % 2 == 0)
+                        g.drawImage(curBoardSquare1,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
+                    else
+                        g.drawImage(curBoardSquare2,Window.getX(xdelta*zcol),Window.getY(ydelta*zrow),xdelta + 4,ydelta + 4,observe);
                 }
             }
+        //Draw the grid.
             g.setColor(Color.black);
-            g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210 + playersInCheck*32, 40);
-            g.setColor(Color.white);
-            g.drawString("Player " + checkString + " in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);  
+            for (int zi = 1;zi<NUM_ROWS;zi++)
+            {
+                g.drawLine(Window.getX(0),Window.getY(zi*ydelta),
+                        Window.getX(Window.getWidth2()),Window.getY(zi*ydelta));
+            }
+
+            for (int zi = 1;zi<NUM_COLUMNS;zi++)
+            {
+                g.drawLine(Window.getX(zi*xdelta),Window.getY(0),
+                        Window.getX(zi*xdelta),Window.getY(Window.getHeight2()));
+            }
+        //draw possible moves
+            boolean activePiece = selectedPiece != null;
+            if(activePiece && selectedPiece.myPlayer == Player.GetCurrentPlayer() && !selectedPiece.moving)
+                selectedPiece.DrawPossibleMoves(g,xdelta,ydelta);
+        //draw the pieces
+            counter++;
+            if(counter % 2 == 0)// this prevents the concurrent modification error that happens at start somtimes
+                allPiecesSize1 = allPieces.size();
+            else if(counter % 2 == 1)
+                allPiecesSize2 = allPieces.size();
+            if(allPiecesSize1 == allPiecesSize2){
+                for(Piece pec : allPieces){
+                    if(pec != selectedPiece)
+                        g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+                    else if(!selectedPiece.moving)
+                        g.drawImage(pec.pieceImage,Window.getX(xdelta*pec.xPos),Window.getY(ydelta*pec.yPos),xdelta + 4,ydelta + 4,observe);
+                }
+            }
+        //Run the animation method
+            if(activePiece && selectedPiece.moving)
+                selectedPiece.Move(xdelta, ydelta, g);
+        //Display in check or not
+            if(Player.PlayerInCheck){
+                String checkString = "";
+                int playersInCheck = 0;
+                for(Player play : Player.players){
+                    if (play.inCheck) {
+                        g.setFont(new Font("Arial",Font.PLAIN,25));
+                        checkString += "|" + (play.GetPlayerNumber() + 1) + "| ";
+                        playersInCheck++;
+                    }
+                }
+                g.setColor(Color.black);
+                g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210 + playersInCheck*32, 40);
+                g.setColor(Color.white);
+                g.drawString("Player " + checkString + " in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);  
+            }
+        //Display if a player has won.
+            if (winner == WinState.WIN_P1) {
+                g.setColor(myColor);
+                g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                g.setColor(Color.black);
+                g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                g.setColor(Color.white);
+                g.setFont(new Font("Arial",Font.PLAIN,50));
+                g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
+            } else if (winner == WinState.WIN_P2) {
+                g.setColor(myColor);
+                g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                g.setColor(Color.white);
+                g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                g.setColor(Color.black);
+                g.setFont(new Font("Arial",Font.PLAIN,50));
+                g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
+            } else if (winner == WinState.TIE) {
+                g.setColor(myColor);
+                g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                g.setColor(Color.white);
+                g.setFont(new Font("Arial",Font.PLAIN,20));
+                g.drawString("It is a tie",40,65);                
+            }
+            
+            
         }
-    //Display if a player has won.
-        if (winner == WinState.WIN_P1) {
-            g.setColor(myColor);
-            g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-            g.setColor(Color.black);
-            g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
-            g.setColor(Color.white);
-            g.setFont(new Font("Arial",Font.PLAIN,50));
-            g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
-        } else if (winner == WinState.WIN_P2) {
-            g.setColor(myColor);
-            g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-            g.setColor(Color.white);
-            g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
-            g.setColor(Color.black);
-            g.setFont(new Font("Arial",Font.PLAIN,50));
-            g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
-        } else if (winner == WinState.TIE) {
-            g.setColor(myColor);
-            g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-            g.setColor(Color.white);
+        //draws the current player at the top for 2 player
+        if(Chess.normalMode){
+            g.setColor(Color.WHITE);
             g.setFont(new Font("Arial",Font.PLAIN,20));
-            g.drawString("It is a tie",40,65);                
+                if(Player.GetCurrentPlayer() == Player.players[0])
+                    g.drawString("White's turn",40,65);
+                else
+                    g.drawString("Blacks's turn",40,65);
         }
-        }
+            
+        //draws the current player at the top for four player
+        if(Chess.P4Mode){
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial",Font.PLAIN,20));
+                   
+                if(Player.GetCurrentPlayer() == Player.players[0])
+                    g.drawString("Blues's turn",40,65);
+                else if (Player.GetCurrentPlayer() == Player.players[1])
+                    g.drawString("Red's turn",40,65);
+                else if(Player.GetCurrentPlayer() == Player.players[2])
+                    g.drawString("Green's turn",40,65);
+                else
+                    g.drawString("Yellow's turn",40,65);
+            }
     }
     public static void DrawPiece() {
         if(start){
@@ -577,6 +603,10 @@ public class Board{
     public static void start(){
         start = true;
     }
+    //sets start to false, de-activates the screen switching
+    public static void stop(){
+        start = false;
+    }
    
     //paints the first screen
     public static void firstScreen(Graphics2D g) {
@@ -588,6 +618,7 @@ public class Board{
         g.drawString("WELCOME TO CHESS!",75,Window.WINDOW_HEIGHT/2);
         
     }
+    
     
     
     
