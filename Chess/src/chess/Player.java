@@ -12,25 +12,29 @@ public class Player {
     public static int turnTracker = 0;
     public static boolean PlayerInCheck = false;
     
-    //Player Info  
+    //Player Info
+    public boolean hasKing = true;
+    public boolean won = false;
+    public Color myCol;
     private int playerNum;
     public boolean inCheck = false;
-    private int points;
+    public int points;
     private String name;
     
     
-    Player( int num)
+    Player(int num, Color col)
     {
+        myCol = col;
         playerNum = num;
         points=0;
         name=PickName(playerNum);
     }
     public static void Reset()
     {
-        players[0] = new Player(0);//player 1 white / red 
-        players[1] = new Player(1);//player 2 black /blue
-        players[2] = new Player(2);//player 1 green
-        players[3] = new Player(3);//player 2 yell
+        players[0] = new Player(0, Color.red);//player 1 white / red 
+        players[1] = new Player(1, Color.blue);//player 2 black /blue
+        players[2] = new Player(2, Color.green);//player 1 green
+        players[3] = new Player(3, Color.yellow);//player 2 yellow
         currentTurn = players[0];
         turnTracker = 0;
         PlayerInCheck = false;
@@ -56,6 +60,11 @@ public class Player {
             turnTracker++;
             if(turnTracker == 4)
                 turnTracker = 0;
+            while(!players[turnTracker].hasKing){
+                turnTracker++;
+                if(turnTracker == 4)
+                    turnTracker = 0;
+            }
             currentTurn = players[turnTracker];
         }
         PlayerInCheck = false;
@@ -89,13 +98,13 @@ public class Player {
     }
     public static void Draw(Graphics2D g){
             g.setColor(Color.blue);
-            g.drawString(Player.getName(0)+":"+players[0].points,30,640);
+            g.drawString(Player.getName(0)+":"+players[0].points,Window.getWidth2() / 4  - 100,Window.getHeight2() + 95);
             g.setColor(Color.red);            
-            g.drawString(Player.getName(1)+":"+players[1].points,200,640);
+            g.drawString(Player.getName(1)+":"+players[1].points,Window.getWidth2() / 2  - 100,Window.getHeight2() + 95);
             g.setColor(Color.green);
-            g.drawString(Player.getName(2)+":"+players[2].points,370,640);
+            g.drawString(Player.getName(2)+":"+players[2].points,Window.getWidth2() / 4 * 3  - 100,Window.getHeight2() + 95);
             g.setColor(Color.yellow);
-            g.drawString(Player.getName(3)+":"+players[3].points,550,640);
+            g.drawString(Player.getName(3)+":"+players[3].points,Window.getWidth2() - 100,Window.getHeight2() + 95);
     }
 //    public static void JFrame(){
 //        JFrame frame = new JFrame("Player Names");

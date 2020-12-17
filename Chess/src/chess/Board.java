@@ -294,9 +294,10 @@ public class Board{
                 if(Window.getX(x) > Window.getX(xdelta*pec.xPos) && Window.getX(x) < Window.getX(xdelta*pec.xPos + xdelta) &&
                    Window.getY(y) > Window.getY(ydelta*pec.yPos) && Window.getY(y) < Window.getY(ydelta*pec.yPos + ydelta)){
                     if(pec.myPlayer == Player.GetCurrentPlayer() && winner.equals(WinState.NO_WIN)){
-
-                        selectedPiece = pec;
-
+                        if(selectedPiece == null)//dont delete fixes problem
+                            selectedPiece = pec;
+                        else if(selectedPiece != null && !selectedPiece.moving)
+                            selectedPiece = pec;
                         if(Player.GetCurrentPlayer().inCheck){//might want to remove this, because if you want to move a differnt piece to save your king you wont be able to
                             if(!(selectedPiece instanceof King)){//makes it so the effected player can only chose thier king
                                 selectedPiece = null;
@@ -374,17 +375,27 @@ public class Board{
     //Remove a piece based off of x,y coords also decided if game has been won
     public static void RemovePiece(int x,int y){
         Piece piecToRemove = null;
+        int z = 0;
         for(Piece pec : allPieces){
             if(pec.xPos == x && pec.yPos == y){
                 piecToRemove = pec;
-                if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
-                    winner = WinState.WIN_P1;
-                    Player.AddPoint(0);
+                if(Chess.normalMode){
+                    if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
+                        winner = WinState.WIN_P1;
+                        Player.AddPoint(0);
+                    }
+                    else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
+                        winner = WinState.WIN_P2;
+                        Player.AddPoint(1);
+                    }
                 }
-                else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
-                    winner = WinState.WIN_P2;
-                    Player.AddPoint(1);
-                        }
+                if(Chess.P4Mode){
+                    for(Player play : Player.players)
+                        if(!play.hasKing)
+                            z++;
+                    if(z == 3)
+                        System.out.println("player has won");
+                }
             }
         }
         board[piecToRemove.xPos][piecToRemove.yPos] = null;
@@ -393,14 +404,28 @@ public class Board{
 
     //Remove a piece based off an instance also decided if game has been won
     public static void RemovePiece(Piece pec){
-        if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
-            winner = WinState.WIN_P1;
-            Player.AddPoint(0);
+        int z =0;
+        if(Chess.normalMode){
+            if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(1)){//Gives win to player1
+                winner = WinState.WIN_P1;
+                Player.AddPoint(0);
+            }
+            else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
+                winner = WinState.WIN_P2;
+                Player.AddPoint(1);
+            }
         }
-        else if(pec instanceof King && pec.myPlayer.GetPlayerNumber().equals(0)){//gives win to player2
-            winner = WinState.WIN_P2;
-            Player.AddPoint(1);
-                }
+        if(Chess.P4Mode){
+            for(Player play : Player.players)
+                if(!play.hasKing)
+                    z++;
+            if(z == 3)
+                for(Player play : Player.players)
+                    if(play.hasKing){
+                        play.won = true;
+                        play.points++;
+                    }
+        }
         allPieces.remove(pec);
     }
 
@@ -427,6 +452,11 @@ public class Board{
         else
             clip.loop(i);
         selectedPiece.moving = false;
+        if(removePiece instanceof King){
+            for(Player play : Player.players)
+                if(play == removePiece.myPlayer)
+                    play.hasKing = false;
+        }
         if(removePiece != null)
             RemovePiece(removePiece);
         if(selectedPiece instanceof Pawn){//if a pawn gets to the end a queen is made
@@ -549,32 +579,44 @@ public class Board{
                 g.drawString("Player " + checkString + " in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);  
             }
         //Display if a player has won.
-            if (winner == WinState.WIN_P1) {
-                g.setColor(myColor);
-                g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-                g.setColor(Color.black);
-                g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
-                g.setColor(Color.white);
-                g.setFont(new Font("Arial",Font.PLAIN,50));
-                g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
-            } else if (winner == WinState.WIN_P2) {
-                g.setColor(myColor);
-                g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-                g.setColor(Color.white);
-                g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
-                g.setColor(Color.black);
-                g.setFont(new Font("Arial",Font.PLAIN,50));
-                g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
-            } else if (winner == WinState.TIE) {
-                g.setColor(myColor);
-                g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-                g.setColor(Color.white);
-                g.setFont(new Font("Arial",Font.PLAIN,20));
-                g.drawString("It is a tie",40,65);                
+            if(Chess.normalMode){
+                if (winner == WinState.WIN_P1) {
+                    g.setColor(myColor);
+                    g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                    g.setColor(Color.black);
+                    g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("Arial",Font.PLAIN,50));
+                    g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
+                } else if (winner == WinState.WIN_P2) {
+                    g.setColor(myColor);
+                    g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                    g.setColor(Color.white);
+                    g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                    g.setColor(Color.black);
+                    g.setFont(new Font("Arial",Font.PLAIN,50));
+                    g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
+                } else if (winner == WinState.TIE) {
+                    g.setColor(myColor);
+                    g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                    g.setColor(Color.white);
+                    g.setFont(new Font("Arial",Font.PLAIN,20));
+                    g.drawString("It is a tie",40,65);                
+                }
             }
-
-            
-            
+            else if(Chess.P4Mode){
+                for(Player play : Player.players){
+                    if(play.won){
+                        g.setColor(myColor);
+                        g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
+                        g.setColor(Color.white);
+                        g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
+                        g.setColor(play.myCol);
+                        g.setFont(new Font("Arial",Font.PLAIN,50));
+                        g.drawString("Player " + (play.GetPlayerNumber() + 1) + " Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);     
+                    }
+                }
+            }
         }
 ///////////////////////////////////////////////////////////////////////////
         //draws the current player at the top for 2 player
@@ -584,7 +626,7 @@ public class Board{
                 if(Player.GetCurrentPlayer() == Player.players[0])
                     g.drawString("White's turn",40,65);
                 else
-                    g.drawString("Blacks's turn",40,65);
+                    g.drawString("Black's turn",40,65);
         }
             
         //draws the current player at the top for four player
@@ -593,7 +635,7 @@ public class Board{
             g.setFont(new Font("Arial",Font.PLAIN,20));
                    
                 if(Player.GetCurrentPlayer() == Player.players[0])
-                    g.drawString("Blues's turn",40,65);
+                    g.drawString("Blue's turn",40,65);
                 else if (Player.GetCurrentPlayer() == Player.players[1])
                     g.drawString("Red's turn",40,65);
                 else if(Player.GetCurrentPlayer() == Player.players[2])

@@ -7,7 +7,7 @@ public class Window {
     private static final int TOP_BORDER = 40;
     private static final int BOTTOM_BORDER = 20;
     private static final int YTITLE = 40;
-    private static final int WINDOW_BORDER = 8;
+    private static final int WINDOW_BORDER = 12;
     
     
     static final int WINDOW_WIDTH = 2*(WINDOW_BORDER + XBORDER) + 600;

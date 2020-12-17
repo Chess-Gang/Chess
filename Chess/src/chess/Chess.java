@@ -68,6 +68,8 @@ public class Chess extends JFrame implements Runnable {
         NewGame.addActionListener((ActionEvent e) -> {
             Chess.randomize.enable();        
             Player.NewGameReset();
+            for(Player play : Player.players)
+                play.won = false;
             if(Chess.normalMode){
                 Board.BOARD_SIZE = 8;
                 Board.NormalReset();
@@ -176,7 +178,7 @@ public class Chess extends JFrame implements Runnable {
                 if (e.BUTTON3 == e.getButton()) {
                     int x = e.getX() - Window.getX(0);
                     int y = e.getY() - Window.getY(0);
-                    reset();
+                    //reset();
                 }
                 if (e.BUTTON2 == e.getButton()) {
                     //Chess.MenuChange();
@@ -307,6 +309,7 @@ public class Chess extends JFrame implements Runnable {
         NewGame.setVisible(false);
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         Board.stop();
+        Player.Reset();
         Chess.normalMode = false;
         Chess.P4Mode = false;
     }
