@@ -569,14 +569,14 @@ public class Board{
                 for(Player play : Player.players){
                     if (play.inCheck) {
                         g.setFont(new Font("Arial",Font.PLAIN,25));
-                        checkString += "|" + (play.GetPlayerNumber() + 1) + "| ";
+                        checkString += "|" + Player.PickName(play.GetPlayerNumber()) + "| ";
                         playersInCheck++;
                     }
                 }
                 g.setColor(Color.black);
                 g.fillRect(Window.getWidth2() / 2 - 65, Window.getHeight2() / 4, 210 + playersInCheck*32, 40);
                 g.setColor(Color.white);
-                g.drawString("Player " + checkString + " in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);  
+                g.drawString(checkString + " is in Check",Window.getWidth2() / 2 - 60,Window.getHeight2() / 4 + 30);  
             }
         //Display if a player has won.
             if(Chess.normalMode){
@@ -587,7 +587,7 @@ public class Board{
                     g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
                     g.setColor(Color.white);
                     g.setFont(new Font("Arial",Font.PLAIN,50));
-                    g.drawString("Player 1 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
+                    g.drawString(Player.PickName(0) + " Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
                 } else if (winner == WinState.WIN_P2) {
                     g.setColor(myColor);
                     g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
@@ -595,7 +595,7 @@ public class Board{
                     g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
                     g.setColor(Color.black);
                     g.setFont(new Font("Arial",Font.PLAIN,50));
-                    g.drawString("Player 2 Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
+                    g.drawString(Player.PickName(0) + " Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);                
                 } else if (winner == WinState.TIE) {
                     g.setColor(myColor);
                     g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
@@ -613,7 +613,7 @@ public class Board{
                         g.fillRect(Window.getWidth2() / 2 - 130, Window.getHeight2() / 2, 325, 60);
                         g.setColor(play.myCol);
                         g.setFont(new Font("Arial",Font.PLAIN,50));
-                        g.drawString("Player " + (play.GetPlayerNumber() + 1) + " Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);     
+                        g.drawString(Player.PickName(play.GetPlayerNumber()) + " Wins",Window.getWidth2() / 2 - 125,Window.getHeight2() / 2 + 50);     
                     }
                 }
             }
@@ -677,6 +677,7 @@ public class Board{
         g.setFont(new Font("Arial",Font.PLAIN,20));
         g.drawString("Click 4 player mode to play a 4-way chess game", 110, 200);
         g.drawString("or click normal mode to play a 2-player chess game", 110, 220);
+        g.drawString("Press middle mouse button to come back to this menu", 110, 320);
         g.drawString("the 'black' & 'brown' buttons change the color of the board", 80, 340);
         g.drawString("the 'randomize' button change randomize the back row of pieces", 60, 360);
         g.drawString("If 'move steal' is on, the pieces can steal the moves of other pieces.", 50, 380);

@@ -27,7 +27,7 @@ public class Player {
         myCol = col;
         playerNum = num;
         points=0;
-        name=PickName(playerNum);
+        name = PickName(playerNum);
     }
     public static void Reset()
     {
@@ -83,35 +83,27 @@ public class Player {
     public static void AddPoint(int x){
         players[x].points++;
     }
-    public String PickName(int _num){
-       if(_num==0)
-           return("Player1");
-       else if(_num==1)
-           return("Player2");
-       else if(_num==2)
-           return("Player3");
-       else 
-           return("Player4");
-    }
-    public static String getName(int x){
-        return(players[x].name);
+    public static String PickName(int _num){
+        switch (_num) {
+            case 0:
+                return(Usernames.Player1);
+            case 1:
+                return(Usernames.Player2);
+            case 2:
+                return(Usernames.Player3);
+            default:
+                return(Usernames.Player4);
+        }
     }
     public static void Draw(Graphics2D g){
             g.setColor(Color.blue);
-            g.drawString(Player.getName(0)+":"+players[0].points,Window.getWidth2() / 4  - 100,Window.getHeight2() + 95);
+            g.drawString(Player.PickName(0)+" : "+players[0].points,Window.getWidth2() / 4  - 100,Window.getHeight2() + 95);
             g.setColor(Color.red);            
-            g.drawString(Player.getName(1)+":"+players[1].points,Window.getWidth2() / 2  - 100,Window.getHeight2() + 95);
+            g.drawString(Player.PickName(1)+" : "+players[1].points,Window.getWidth2() / 2  - 100,Window.getHeight2() + 95);
             g.setColor(Color.green);
-            g.drawString(Player.getName(2)+":"+players[2].points,Window.getWidth2() / 4 * 3  - 100,Window.getHeight2() + 95);
+            g.drawString(Player.PickName(2)+" : "+players[2].points,Window.getWidth2() / 4 * 3  - 100,Window.getHeight2() + 95);
             g.setColor(Color.yellow);
-            g.drawString(Player.getName(3)+":"+players[3].points,Window.getWidth2() - 100,Window.getHeight2() + 95);
+            g.drawString(Player.PickName(3)+" : "+players[3].points,Window.getWidth2() - 100,Window.getHeight2() + 95);
     }
-//    public static void JFrame(){
-//        JFrame frame = new JFrame("Player Names");
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.getContentPane().add(emptyLabel, BorderLayout.CENTER);
-//        frame.pack();
-//        frame.setVisible(true);
-//    }
 
 }
