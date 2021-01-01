@@ -13,6 +13,7 @@ public class Chess extends JFrame implements Runnable {
     static Button P4ModeBut = new Button("4 Player Chess");
     static Button randomize = new Button("Randomize");
     static Button moveStealBut = new Button("Move Steal");
+    static Button rulesBut = new Button("Rules");
     static Button brown = new Button("Brown");
     static Button black = new Button("Black");
     static Button NewGame = new Button("New Game");
@@ -25,6 +26,7 @@ public class Chess extends JFrame implements Runnable {
     public static boolean normalMode;
     public static boolean P4Mode;
     public static boolean moveStealEnabled;
+    public static boolean rulesScreenUp;
     
     //Graphichs
     Image image;
@@ -62,6 +64,10 @@ public class Chess extends JFrame implements Runnable {
             String state = moveStealEnabled ? "enabled" : "disabled";
             JOptionPane.showMessageDialog(frame,"Move Steal is now " + state);
 
+        });
+        //Create button to show rules screen
+        rulesBut.addActionListener((ActionEvent e) -> {
+            rulesScreenUp = true;
         });
         //Button NewGame = new Button("New Game");
         NewGame.setVisible(false);
@@ -104,6 +110,7 @@ public class Chess extends JFrame implements Runnable {
             randomize.setVisible(true);
             NewGame.setVisible(true);
             moveStealBut.setVisible(true);
+            rulesBut.setVisible(false);
             
 
             //repaints the panel, switches to the correct buttons
@@ -131,6 +138,7 @@ public class Chess extends JFrame implements Runnable {
             //randomize.setVisible(true);//randomize doesnt work in P4mode so it can stay invisible
             moveStealBut.setVisible(true);
             NewGame.setVisible(true);
+            rulesBut.setVisible(false);
 
             //repaints the panel, switches to the correct buttons
             buttonPanel.revalidate();
@@ -148,6 +156,7 @@ public class Chess extends JFrame implements Runnable {
         buttonPanel.add(randomize);
         buttonPanel.add(NewGame);
         buttonPanel.add(moveStealBut);
+        buttonPanel.add(rulesBut);
         
         
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
@@ -253,7 +262,8 @@ public class Chess extends JFrame implements Runnable {
         }
 
         Board.firstScreen(g);
-
+        if(rulesScreenUp)
+            Board.DrawRulesScreen(g);
         if(Chess.normalMode || Chess.P4Mode){
             Board.Draw(g);
             for (int zi = 0;zi<Board.BOARD_SIZE;zi++)
@@ -286,6 +296,7 @@ public class Chess extends JFrame implements Runnable {
     
 /////////////////////////////////////////////////////////////////////////
     public static void reset() {
+        rulesScreenUp = false;
         Chess.moveStealEnabled = false;
         Chess.randomize.enable();
         Player.Reset();
@@ -307,11 +318,13 @@ public class Chess extends JFrame implements Runnable {
         randomize.enable();
         moveStealBut.setVisible(false);
         NewGame.setVisible(false);
+        rulesBut.setVisible(true);
         frame.getContentPane().add(buttonPanel,BorderLayout.NORTH);
         Board.stop();
         Player.Reset();
         Chess.normalMode = false;
         Chess.P4Mode = false;
+        rulesScreenUp = false;
     }
 /////////////////////////////////////////////////////////////////////////
     public void animate() {

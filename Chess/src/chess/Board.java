@@ -44,6 +44,8 @@ public class Board{
     static int counter;//these ints prevent a concurrent modification error that somtime happened at start
     static int allPiecesSize1;
     static int allPiecesSize2;
+    static Image startScreen = Toolkit.getDefaultToolkit().getImage("./GameScreen.png");
+    static Image rulesScreen = Toolkit.getDefaultToolkit().getImage("./RulesScreen.png");
 
     //for the start & end screens
     private static boolean start;
@@ -668,21 +670,9 @@ public class Board{
 //////////////////////////// I will work on making this look nicer///////////////////////////
     //paints the first screen
     public static void firstScreen(Graphics2D g) {
-        if(start == false)
-        g.setColor(Color.GRAY);
-        g.fillRect(Window.getX(0),Window.getY(0), Window.getWidth2(), Window.getHeight2());
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Arial",Font.PLAIN,50));
-        g.drawString("WELCOME TO CHESS!",75,150);
-        g.setFont(new Font("Arial",Font.PLAIN,20));
-        g.drawString("Click 4 player mode to play a 4-way chess game", 110, 200);
-        g.drawString("or click normal mode to play a 2-player chess game", 110, 220);
-        g.drawString("Press middle mouse button to come back to this menu", 110, 320);
-        g.drawString("the 'black' & 'brown' buttons change the color of the board", 80, 340);
-        g.drawString("the 'randomize' button change randomize the back row of pieces", 60, 360);
-        g.drawString("If 'move steal' is on, the pieces can steal the moves of other pieces.", 50, 380);
-        
+        g.drawImage(startScreen, Window.getX(0), Window.getY(0), Window.getWidth2(), Window.getHeight2(), observe);
     }
-    
-
+    public static void DrawRulesScreen(Graphics2D g) {
+        g.drawImage(rulesScreen, Window.getX(0), Window.getY(0), Window.getWidth2(), Window.getHeight2(), observe);
+    }
 }
